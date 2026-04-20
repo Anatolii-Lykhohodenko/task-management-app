@@ -1,6 +1,7 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
 }
@@ -15,7 +16,7 @@ enum Status {
 enum Priority {
   LOW
   MEDIUM
-  HIGH  
+  HIGH
   CRITICAL
 }
 
@@ -29,22 +30,23 @@ model User {
 }
 
 model Project {
-  id     Int     @id @default(autoincrement())
-  name   String
+  id        Int      @id @default(autoincrement())
+  name      String
   createdAt DateTime @default(now())
-  user   User  @relation(fields: [ownerId], references: [id])
-  ownerId Int
+  user      User     @relation(fields: [ownerId], references: [id])
+  ownerId   Int
 
   tasks Task[]
 }
 
 model Task {
-  id Int @id @default(autoincrement())
-  title String
-  status Status @default(OPEN)
-  priority Priority @default(MEDIUM)
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      Status   @default(OPEN)
+  priority    Priority @default(MEDIUM)
+  createdAt   DateTime @default(now())
 
-  project Project @relation(fields: [projectId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id])
   projectId Int
 }
