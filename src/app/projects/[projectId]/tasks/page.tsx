@@ -1,18 +1,19 @@
-import CreateTaskForm from '@/components/tasks/CreateTaskForm';
+import TaskForm from '@/components/tasks/TaskForm';
 import prisma from '@/lib/db/client';
+import { createTask } from '@/server/actions/tasks';
 import Link from 'next/link';
 
 type Props = {
   params: Promise<{
-    id: string;
+    projectId: string;
   }>;
 };
 
 export default async function TasksPage({ params }: Props) {
-  const { id } = await params;
+  const { projectId } = await params;
   const tasks = await prisma.task.findMany({
     where: {
-      projectId: +id,
+      projectId: +projectId,
     },
     select: {
       id: true,
@@ -27,14 +28,14 @@ export default async function TasksPage({ params }: Props) {
         {tasks.map((task) => {
           return (
             <li key={task.id}>
-              <Link href={`/projects/${id}/tasks/${task.id}`}>
+              <Link href={`/projects/${projectId}/tasks/${task.id}`}>
                 {task.title}
               </Link>
             </li>
           );
         })}
       </ul>
-      <CreateTaskForm projectId={id} />
+      <TaskForm projectId={projectId} serverAction={createTask} />
     </>
   );
 }

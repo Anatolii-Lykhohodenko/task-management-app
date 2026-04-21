@@ -1,13 +1,15 @@
 import prisma from '@/lib/db/client';
+import { deleteTask } from '@/server/actions/tasks';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 type Props = {
-  params: Promise<{ id: string; taskId: string }>;
+  params: Promise<{ projectId: string; taskId: string }>;
 };
 
 export default async function TaskPage({ params }: Props) {
-  const { id, taskId } = await params;
+  const { projectId, taskId } = await params;
+  const deleteWithIds = deleteTask.bind(null, projectId, taskId);
 
   const task = await prisma.task.findUnique({
     where: {
@@ -26,7 +28,7 @@ export default async function TaskPage({ params }: Props) {
 
   return (
     <>
-      <Link href={`/projects/${id}/tasks`}>Back to tasks</Link>
+      <Link href={`/projects/${projectId}/tasks`}>Back to tasks</Link>
       <div>
         <div>
           <h1>{task.title}</h1>
@@ -35,6 +37,12 @@ export default async function TaskPage({ params }: Props) {
           <p>CreatedAt = {task.createdAt.toDateString()}</p>
           <p>Description = {task.description}</p>
         </div>
+        <Link href={`/projects/${projectId}/tasks/${taskId}/edit`}>
+          Edit task
+        </Link>
+        <form action={deleteWithIds}>
+          <button type="submit">Delete task</button>
+        </form>
       </div>
     </>
   );
