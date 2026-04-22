@@ -47,22 +47,20 @@ export default function TaskForm({
     defaultValues?.priority ?? Priority.MEDIUM
   );
 
-return (
-  <div className="space-y-6 max-w-lg">
-    <h1 className="text-2xl font-semibold">
-      {defaultValues ? 'Update task' : 'Create a new task'}
-    </h1>
-    <form action={action} className="space-y-4">
+  return (
+    <form action={action} className="space-y-5">
       <div className="space-y-1.5">
         <Label htmlFor="title">Title</Label>
         <Input
-          type="text"
-          name="title"
           id="title"
-          defaultValue={defaultValues?.title || ''}
+          name="title"
+          type="text"
+          defaultValue={defaultValues?.title ?? ''}
+          placeholder="Enter task title"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="status">Status</Label>
           <Select onValueChange={setStatus} defaultValue={status}>
@@ -79,6 +77,7 @@ return (
           </Select>
           <input type="hidden" name="status" value={status} />
         </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="priority">Priority</Label>
           <Select onValueChange={setPriority} defaultValue={priority}>
@@ -96,27 +95,34 @@ return (
           <input type="hidden" name="priority" value={priority} />
         </div>
       </div>
+
       <div className="space-y-1.5">
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
           name="description"
-          defaultValue={defaultValues?.description || ''}
+          defaultValue={defaultValues?.description ?? ''}
+          placeholder="Add more context for this task"
+          className="min-h-32"
         />
       </div>
+
       <input type="hidden" name="projectId" value={projectId} />
       {taskId && <input type="hidden" name="taskId" value={taskId} />}
-      <Button type="submit" disabled={isPending} className="w-full">
-        {isPending
-          ? 'Saving...'
-          : defaultValues
-            ? 'Save changes'
-            : 'Create task'}
-      </Button>
+
+      <div className="flex items-center gap-3">
+        <Button type="submit" disabled={isPending}>
+          {isPending
+            ? 'Saving...'
+            : defaultValues
+              ? 'Save changes'
+              : 'Create task'}
+        </Button>
+      </div>
+
       {state?.error && (
         <p className="text-sm text-destructive">{state.error}</p>
       )}
     </form>
-  </div>
-);
+  );
 }

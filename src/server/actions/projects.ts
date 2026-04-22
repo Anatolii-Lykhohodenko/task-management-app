@@ -1,17 +1,28 @@
-'use server'
+'use server';
 
 import prisma from '@/lib/db/client';
+import { createProjectSchema } from '@/schemas/project.schema';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 type ActionState = {
-  error?: string,
-  success?: boolean
-} | null
+  error?: string;
+  success?: boolean;
+} | null;
 
-export async function createProject(prevState: ActionState, formData: FormData) {
-  const name = formData.get('name') as string; 
-  if (!name) return { error: 'Name is required' };
+export async function createProject(
+  _prevState: ActionState,
+  formData: FormData
+) {
+  const result = createProjectSchema.safeParse({
+    name: formData.get('name'),
+  });
+  if (!result.success) {
+    return {
+      error: result.error.issues[0]?.message ?? 'Invalid form data',
+    };
+  }
+  const { name } = result.data;
 
   await prisma.project.create({
     data: {
@@ -20,6 +31,6 @@ export async function createProject(prevState: ActionState, formData: FormData) 
     },
   });
 
-    revalidatePath('/projects');
-    redirect('/projects');
+  revalidatePath('/projects');
+  redirect('/projects');
 }
