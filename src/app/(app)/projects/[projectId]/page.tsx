@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import prisma from '@/lib/db/client';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
@@ -9,6 +10,8 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { deleteProject } from '@/server/actions/projects';
+import { DialogYesOrNo } from '../../../../components/ui/DialogYesOrNo';
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -34,7 +37,6 @@ export default async function ProjectPage({ params }: Props) {
         orderBy: {
           createdAt: 'desc',
         },
-        take: 5,
       },
       name: true,
       createdAt: true,
@@ -43,6 +45,13 @@ export default async function ProjectPage({ params }: Props) {
   });
 
   if (!project) notFound();
+
+  const deleteWithIds = deleteProject.bind(null, projectId);
+  const description = !project.tasks.length
+    ? `This will permanently delete the project.`
+    : project.tasks.length === 1
+      ? `This will permanently delete the project and its ${project.tasks.length} task.`
+      : `This will permanently delete the project and all ${project.tasks.length} tasks.`;
 
   return (
     <div className="space-y-6">
@@ -53,8 +62,24 @@ export default async function ProjectPage({ params }: Props) {
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">
           {project.name}
         </h1>
+        <Button asChild>
+          <Link href={`/projects/${projectId}/edit`}>Edit project</Link>
+        </Button>
+
+        <DialogYesOrNo
+          title="Delete project?"
+          description={description}
+          confirmText="Delete project"
+          cancelText="Cancel"
+          variant="destructive"
+          action={deleteWithIds}
+        >
+          <Button variant="destructive">Delete project</Button>
+        </DialogYesOrNo>
+
         <p className="mt-2 text-sm text-muted-foreground">
-          Owned by {project.user.name} · Created {project.createdAt.toDateString()}
+          Owned by {project.user.name} · Created{' '}
+          {project.createdAt.toDateString()}
         </p>
       </div>
 
@@ -82,7 +107,8 @@ export default async function ProjectPage({ params }: Props) {
                 </div>
               ) : (
                 <ul className="divide-y">
-                  {project.tasks.map((task) => (
+                   { /* TODO: fetch tasks count separately via _count instead of loading full tasks array */ }
+                  {project.tasks.slice(0, 5).map((task) => (
                     <li key={task.id}>
                       <Link
                         href={`/projects/${projectId}/tasks/${task.id}`}
@@ -110,9 +136,7 @@ export default async function ProjectPage({ params }: Props) {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Project details</CardTitle>
-              <CardDescription>
-                Quick metadata and summary
-              </CardDescription>
+              <CardDescription>Quick metadata and summary</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div>

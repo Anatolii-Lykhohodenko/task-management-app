@@ -1,4 +1,3 @@
-import CreateProjectForm from '@/components/projects/CreateProjectForm';
 import prisma from '@/lib/db/client';
 import Link from 'next/link';
 import {
@@ -9,6 +8,8 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ProjectForm } from '@/components/projects/ProjectForm';
+import { createProject } from '@/server/actions/projects';
 
 export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({
@@ -39,7 +40,7 @@ export default async function ProjectsPage() {
           <CardDescription>Add a new workspace project.</CardDescription>
         </CardHeader>
         <CardContent>
-          <CreateProjectForm />
+          <ProjectForm serverAction={createProject} />
         </CardContent>
       </Card>
 

@@ -1,4 +1,4 @@
-import TaskForm from '@/components/tasks/TaskForm';
+import { TaskForm } from '@/components/tasks/TaskForm';
 import prisma from '@/lib/db/client';
 import { createTask } from '@/server/actions/tasks';
 import Link from 'next/link';
@@ -80,6 +80,7 @@ export default async function TasksPage({ params }: Props) {
                     >
                       <span className="block truncate">{task.title}</span>
                     </Link>
+                    
                     <div className="flex shrink-0 items-center gap-2">
                       <Badge variant="secondary">{task.status}</Badge>
                       <Badge variant="outline">{task.priority}</Badge>

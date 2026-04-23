@@ -78,10 +78,13 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
 export async function deleteTask(projectId: string, taskId: string) {
   const numericProjectId = Number(projectId);
   const numericTaskId = Number(taskId);
-  if (!projectId || Number.isNaN(numericProjectId))
-    return { error: 'Project not found' };
-  if (!taskId || Number.isNaN(numericTaskId))
-    return { error: 'Task not found' };
+  if (!projectId || Number.isNaN(numericProjectId)) {
+    throw new Error('Project not found');
+  }
+
+  if (!taskId || Number.isNaN(numericTaskId)) {
+    throw new Error('Task not found');
+  }
 
   await prisma.task.delete({
     where: {

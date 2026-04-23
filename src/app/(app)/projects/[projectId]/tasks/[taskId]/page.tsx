@@ -9,8 +9,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardContent,
-  CardFooter,
+  CardContent
 } from '@/components/ui/card';
 
 type Props = {

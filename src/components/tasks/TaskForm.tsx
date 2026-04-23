@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useActionState, useState } from 'react';
 import { Status, Priority } from '@prisma/client';
@@ -33,7 +33,7 @@ type Props = {
   };
 };
 
-export default function TaskForm({
+export function TaskForm({
   serverAction,
   projectId,
   taskId,
