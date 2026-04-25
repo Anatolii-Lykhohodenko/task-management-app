@@ -10,6 +10,7 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { notFound } from 'next/navigation';
 
 type Props = {
   params: Promise<{
@@ -19,33 +20,51 @@ type Props = {
 
 export default async function TasksPage({ params }: Props) {
   const { projectId } = await params;
+  const [project, tasks] = await Promise.all([
+    prisma.project.findUnique({
+      where: {
+        id: +projectId,
+      },
+      select: {
+        name: true,
+        id: true
+      },
+    }),
+    prisma.task.findMany({
+      where: {
+        projectId: +projectId,
+      },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
+  ]);
 
-  const tasks = await prisma.task.findMany({
-    where: {
-      projectId: +projectId,
-    },
-    select: {
-      id: true,
-      title: true,
-      status: true,
-      priority: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  if (!project) notFound();
 
   return (
     <div className="space-y-6">
+      <Link
+        href={`/projects/${project.id}`}
+        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        ← Back to {project.name}
+      </Link>
       <div className="border-b pb-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Tasks
         </p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-          All tasks
+          Tasks for {project.name}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Browse and create tasks for this project.
+          Browse and create tasks for {project.name}.
         </p>
       </div>
 
@@ -80,7 +99,7 @@ export default async function TasksPage({ params }: Props) {
                     >
                       <span className="block truncate">{task.title}</span>
                     </Link>
-                    
+
                     <div className="flex shrink-0 items-center gap-2">
                       <Badge variant="secondary">{task.status}</Badge>
                       <Badge variant="outline">{task.priority}</Badge>

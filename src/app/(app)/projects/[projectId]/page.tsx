@@ -37,6 +37,12 @@ export default async function ProjectPage({ params }: Props) {
         orderBy: {
           createdAt: 'desc',
         },
+        take: 5,
+      },
+      _count: {
+        select: {
+          tasks: true,
+        },
       },
       name: true,
       createdAt: true,
@@ -47,14 +53,22 @@ export default async function ProjectPage({ params }: Props) {
   if (!project) notFound();
 
   const deleteWithIds = deleteProject.bind(null, projectId);
-  const description = !project.tasks.length
+  const description = !project._count.tasks
     ? `This will permanently delete the project.`
-    : project.tasks.length === 1
-      ? `This will permanently delete the project and its ${project.tasks.length} task.`
-      : `This will permanently delete the project and all ${project.tasks.length} tasks.`;
+    : project._count.tasks === 1
+      ? `This will permanently delete the project and its ${project._count.tasks} task.`
+      : `This will permanently delete the project and all ${project._count.tasks} tasks.`;
 
   return (
     <div className="space-y-6">
+      <div>
+        <Link
+          href={`/projects/`}
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          ← Back to projects
+        </Link>
+      </div>
       <div className="border-b pb-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Project
@@ -101,14 +115,13 @@ export default async function ProjectPage({ params }: Props) {
               </Link>
             </CardHeader>
             <CardContent>
-              {project.tasks.length === 0 ? (
+              {project._count.tasks === 0 ? (
                 <div className="rounded-lg border border-dashed px-4 py-8 text-center">
                   <p className="text-sm text-muted-foreground">No tasks yet</p>
                 </div>
               ) : (
                 <ul className="divide-y">
-                   { /* TODO: fetch tasks count separately via _count instead of loading full tasks array */ }
-                  {project.tasks.slice(0, 5).map((task) => (
+                  {project.tasks.map((task) => (
                     <li key={task.id}>
                       <Link
                         href={`/projects/${projectId}/tasks/${task.id}`}
@@ -155,9 +168,9 @@ export default async function ProjectPage({ params }: Props) {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Recent tasks shown
+                  Total tasks
                 </p>
-                <p className="mt-1 font-medium">{project.tasks.length}</p>
+                <p className="mt-1 font-medium">{project._count.tasks}</p>
               </div>
             </CardContent>
           </Card>

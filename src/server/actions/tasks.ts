@@ -86,12 +86,26 @@ export async function deleteTask(projectId: string, taskId: string) {
     throw new Error('Task not found');
   }
 
-  await prisma.task.delete({
+  const task = await prisma.task.findFirst({
     where: {
       id: numericTaskId,
+      projectId: numericProjectId,
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (!task) {
+    throw new Error('Task not found');
+  }
+
+  await prisma.task.delete({
+    where: {
+      id: task.id,
     },
   });
 
   revalidatePath(`/projects/${numericProjectId}/tasks`);
-  redirect(`/projects/${numericProjectId}/tasks`);
+  redirect(`/projects/${numericProjectId}/tasks`, 'replace');
 }

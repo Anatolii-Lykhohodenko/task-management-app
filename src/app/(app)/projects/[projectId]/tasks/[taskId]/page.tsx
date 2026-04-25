@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DialogYesOrNo } from '../../../../../../components/ui/DialogYesOrNo';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
-  CardContent
+  CardContent,
 } from '@/components/ui/card';
 
 type Props = {
@@ -20,9 +21,10 @@ export default async function TaskPage({ params }: Props) {
   const { projectId, taskId } = await params;
   const deleteWithIds = deleteTask.bind(null, projectId, taskId);
 
-  const task = await prisma.task.findUnique({
+  const task = await prisma.task.findFirst({
     where: {
       id: +taskId,
+      projectId: +projectId,
     },
     select: {
       title: true,
@@ -91,11 +93,16 @@ export default async function TaskPage({ params }: Props) {
                 </Link>
               </Button>
 
-              <form action={deleteWithIds}>
-                <Button type="submit" variant="destructive">
-                  Delete task
-                </Button>
-              </form>
+              <DialogYesOrNo
+                title="Delete task?"
+                description={`This will permanently delete the task.`}
+                confirmText="Delete task"
+                cancelText="Cancel"
+                variant="destructive"
+                action={deleteWithIds}
+              >
+                <Button variant="destructive">Delete task</Button>
+              </DialogYesOrNo>
             </CardContent>
           </Card>
         </div>

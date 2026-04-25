@@ -82,5 +82,5 @@ export async function deleteProject(id : string) {
   });
 
   revalidatePath('/projects');
-  redirect('/projects');
+  redirect('/projects', 'replace');
 }
