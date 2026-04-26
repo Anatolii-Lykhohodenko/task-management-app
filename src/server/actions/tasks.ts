@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from '@/lib/db/client';
+import { findTaskInProject } from '@/lib/db/queries';
 import { taskSchema } from '@/schemas/task.schema';
 import { ActionState } from '@/types';
 import { revalidatePath } from 'next/cache';
@@ -59,9 +60,15 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
     return { error: 'Project not found' };
   if (!taskId || Number.isNaN(taskId)) return { error: 'Task not found' };
 
+  const task = await findTaskInProject(taskId, projectId, {
+    id: true,
+  });
+
+  if (!task) return { error: 'Task not found' };
+
   await prisma.task.update({
     where: {
-      id: taskId,
+      id: task.id,
     },
     data: {
       title,
@@ -86,14 +93,8 @@ export async function deleteTask(projectId: string, taskId: string) {
     throw new Error('Task not found');
   }
 
-  const task = await prisma.task.findFirst({
-    where: {
-      id: numericTaskId,
-      projectId: numericProjectId,
-    },
-    select: {
-      id: true
-    }
+  const task = await findTaskInProject(numericTaskId, numericProjectId, {
+    id: true,
   });
 
   if (!task) {

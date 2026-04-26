@@ -1,4 +1,3 @@
-import prisma from '@/lib/db/client';
 import { deleteTask } from '@/server/actions/tasks';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -12,6 +11,7 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
+import { findTaskInProject } from '@/lib/db/queries';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -21,18 +21,18 @@ export default async function TaskPage({ params }: Props) {
   const { projectId, taskId } = await params;
   const deleteWithIds = deleteTask.bind(null, projectId, taskId);
 
-  const task = await prisma.task.findFirst({
-    where: {
-      id: +taskId,
-      projectId: +projectId,
-    },
-    select: {
-      title: true,
-      status: true,
-      priority: true,
-      description: true,
-      createdAt: true,
-    },
+  const numericProjectId = Number(projectId);
+  const numericTaskId = Number(taskId);
+
+  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
+  if (!numericTaskId || Number.isNaN(numericTaskId)) notFound();
+
+  const task = await findTaskInProject(numericTaskId, numericProjectId, {
+    title: true,
+    status: true,
+    priority: true,
+    description: true,
+    createdAt: true,
   });
 
   if (!task) notFound();

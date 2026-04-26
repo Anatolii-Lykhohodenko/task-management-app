@@ -20,19 +20,23 @@ type Props = {
 
 export default async function TasksPage({ params }: Props) {
   const { projectId } = await params;
+    const numericProjectId = Number(projectId);
+
+    if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
+  
   const [project, tasks] = await Promise.all([
     prisma.project.findUnique({
       where: {
-        id: +projectId,
+        id: numericProjectId,
       },
       select: {
         name: true,
-        id: true
+        id: true,
       },
     }),
     prisma.task.findMany({
       where: {
-        projectId: +projectId,
+        projectId: numericProjectId,
       },
       select: {
         id: true,

@@ -18,9 +18,13 @@ type Props = {
 export default async function EditProjectPage({ params }: Props) {
   const { projectId } = await params;
 
+  const numericProjectId = Number(projectId);
+
+  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
+
   const project = await prisma.project.findUnique({
     where: {
-      id: +projectId,
+      id: numericProjectId,
     },
     select: {
       name: true,

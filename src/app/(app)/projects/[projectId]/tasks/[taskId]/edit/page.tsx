@@ -1,5 +1,4 @@
 import { TaskForm } from '@/components/tasks/TaskForm';
-import prisma from '@/lib/db/client';
 import { updateTask } from '@/server/actions/tasks';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -10,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { findTaskInProject } from '@/lib/db/queries';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -18,16 +18,17 @@ type Props = {
 export default async function EditTaskPage({ params }: Props) {
   const { projectId, taskId } = await params;
 
-  const task = await prisma.task.findUnique({
-    where: {
-      id: +taskId,
-    },
-    select: {
-      title: true,
-      status: true,
-      priority: true,
-      description: true,
-    },
+  const numericProjectId = Number(projectId);
+  const numericTaskId = Number(taskId);
+
+  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
+  if (!numericTaskId || Number.isNaN(numericTaskId)) notFound();
+
+  const task = await findTaskInProject(numericTaskId, numericProjectId, {
+    title: true,
+    status: true,
+    priority: true,
+    description: true,
   });
 
   if (!task) notFound();

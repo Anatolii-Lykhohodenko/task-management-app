@@ -8,3 +8,4 @@ export function cn(...inputs: ClassValue[]) {
 export function getCurrentUserId() {
   return 1;
 }
+
