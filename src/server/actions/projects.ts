@@ -3,13 +3,9 @@
 import prisma from '@/lib/db/client';
 import { getCurrentUserId } from '@/lib/utils';
 import { projectSchema } from '@/schemas/project.schema';
+import { ActionState } from '@/types';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-
-type ActionState = {
-  error?: string;
-  success?: boolean;
-} | null;
 
 export async function createProject(
   _prevState: ActionState,
@@ -58,10 +54,10 @@ export async function updateProject(
   await prisma.project.update({
     where: {
       id: projectId,
+      ownerId: getCurrentUserId(),
     },
     data: {
       name,
-      ownerId: getCurrentUserId(),
     },
   });
 

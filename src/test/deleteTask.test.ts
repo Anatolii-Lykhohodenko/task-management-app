@@ -30,7 +30,7 @@ describe('deleteTask', () => {
   });
 
   it('should throw an error if projectId is invalid', async () => {
-    await expect(deleteTask('null', '2')).rejects.toThrow('Project not found');
+    await expect(deleteTask('abc', '2')).rejects.toThrow('Project not found');
 
     expect(findTaskInProject).not.toHaveBeenCalled();
     expect(prisma.task.delete).not.toHaveBeenCalled();
@@ -39,7 +39,7 @@ describe('deleteTask', () => {
   });
 
   it('should throw an error if taskId is invalid', async () => {
-    await expect(deleteTask('1', 'null')).rejects.toThrow('Task not found');
+    await expect(deleteTask('1', 'abc')).rejects.toThrow('Task not found');
 
     expect(findTaskInProject).not.toHaveBeenCalled();
     expect(prisma.task.delete).not.toHaveBeenCalled();
