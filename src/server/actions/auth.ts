@@ -1,9 +1,12 @@
+'use server';
+
 import prisma from '@/lib/db/client';
 import { loginSchema, registerSchema } from '@/schemas/auth.schema';
 import { ActionState } from '@/types';
 import bcrypt from 'bcryptjs';
+import { signIn } from '@/auth';
 
-export async function register(state: ActionState, formData: FormData) {
+export async function register(_state: ActionState, formData: FormData) {
   const result = registerSchema.safeParse({
     name: formData.get('name'),
     password: formData.get('password'),
@@ -30,16 +33,16 @@ export async function register(state: ActionState, formData: FormData) {
       password: cryptedPassword,
       email,
     },
-    select: {
-      name: true,
-      email: true,
-    },
   });
 
-  return { success: true };
+  await signIn('credentials', {
+    email,
+    password,
+    redirectTo: '/projects',
+  });
 }
 
-export async function login(state: ActionState, formData: FormData) {
+export async function login(_state: ActionState, formData: FormData) {
   const result = loginSchema.safeParse({
     password: formData.get('password'),
     email: formData.get('email'),
@@ -51,24 +54,9 @@ export async function login(state: ActionState, formData: FormData) {
 
   const { email, password } = result.data;
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    select: {
-      password: true,
-    },
+  await signIn('credentials', {
+    email,
+    password,
+    redirectTo: '/projects',
   });
-
-  if (!user) {
-    return { error: 'Invalid credentials' };
-  }
-
-  const isCorrectPassword = await bcrypt.compare(password, user.password);
-
-  if (!isCorrectPassword) {
-    return { error: 'Invalid credentials' };
-  }
-
-  return { success: true };
 }

@@ -24,7 +24,7 @@ export async function createProject(
   const newProject = await prisma.project.create({
     data: {
       name,
-      ownerId: getCurrentUserId(),
+      ownerId: await getCurrentUserId(),
     },
   });
 
@@ -54,7 +54,7 @@ export async function updateProject(
   await prisma.project.update({
     where: {
       id: projectId,
-      ownerId: getCurrentUserId(),
+      ownerId: await getCurrentUserId(),
     },
     data: {
       name,
