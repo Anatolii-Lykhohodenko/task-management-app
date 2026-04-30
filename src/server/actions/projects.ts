@@ -20,11 +20,16 @@ export async function createProject(
     };
   }
   const { name } = result.data;
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    return { error: 'Unauthorized' };
+  }
 
   const newProject = await prisma.project.create({
     data: {
       name,
-      ownerId: await getCurrentUserId(),
+      ownerId: +userId,
     },
   });
 
@@ -51,10 +56,16 @@ export async function updateProject(
   }
   const { name } = result.data;
 
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return { error: 'Unauthorized' };
+    }
+
   await prisma.project.update({
     where: {
       id: projectId,
-      ownerId: await getCurrentUserId(),
+      ownerId: +userId,
     },
     data: {
       name,

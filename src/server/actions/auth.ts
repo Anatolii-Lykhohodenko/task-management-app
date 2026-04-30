@@ -10,6 +10,7 @@ export async function register(_state: ActionState, formData: FormData) {
   const result = registerSchema.safeParse({
     name: formData.get('name'),
     password: formData.get('password'),
+    confirmPassword: formData.get('confirm-password'),
     email: formData.get('email'),
   });
 
@@ -35,14 +36,18 @@ export async function register(_state: ActionState, formData: FormData) {
     },
   });
 
+  const callbackUrl = formData.get('callbackUrl')?.toString() || '/projects';
+
   await signIn('credentials', {
     email,
     password,
-    redirectTo: '/projects',
+    redirectTo: callbackUrl,
   });
+
+  return { success: true };
 }
 
-export async function login(_state: ActionState, formData: FormData) {
+export async function login(_state: ActionState | null, formData: FormData) {
   const result = loginSchema.safeParse({
     password: formData.get('password'),
     email: formData.get('email'),
@@ -53,10 +58,13 @@ export async function login(_state: ActionState, formData: FormData) {
   }
 
   const { email, password } = result.data;
+  const callbackUrl = formData.get('callbackUrl')?.toString() || '/projects';
 
   await signIn('credentials', {
     email,
     password,
-    redirectTo: '/projects',
+    redirectTo:callbackUrl,
   });
+
+  return { success: true };
 }

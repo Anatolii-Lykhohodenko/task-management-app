@@ -5,13 +5,18 @@ import { NextResponse } from 'next/server';
 
 const authRoutes = ['/auth/login', '/auth/register'];
 
-export default auth((req : any) => {
+export default auth((req: any) => {
   const { pathname } = req.nextUrl;
   const isAuthRoute = authRoutes.includes(pathname);
   const isLoggedIn = !!req.auth;
 
   if (!isAuthRoute && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/auth/login', req.url));
+    const loginUrl = new URL('/auth/login', req.url);
+    loginUrl.searchParams.set(
+      'callbackUrl',
+      req.nextUrl.pathname + req.nextUrl.search
+    );
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthRoute && isLoggedIn) {
