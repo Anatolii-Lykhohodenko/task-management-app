@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import prisma from '@/lib/db/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getCurrentUserId } from '@/lib/utils';
 import { createProject } from '@/server/actions/projects';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 vi.mock('@/lib/db/client', () => ({
   default: {
@@ -42,7 +42,7 @@ describe('createProject', () => {
   });
 
   it('should correctly create a project', async () => {
-    vi.mocked(getCurrentUserId).mockReturnValue(1);
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     vi.mocked(prisma.project.create).mockResolvedValue({
       name: 'abc',
       ownerId: 1,

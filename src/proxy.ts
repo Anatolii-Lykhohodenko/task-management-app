@@ -1,11 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { auth } from '@/auth';
-import { rootRoute } from '@/lib/utils';
+import { authConfig } from '@/auth.config';
+import { rootRoute } from '@/lib/routes';
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
+const { auth } = NextAuth(authConfig);
 
 const authRoutes = ['/auth/login', '/auth/register'];
 
-export default auth((req: any) => {
+export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isAuthRoute = authRoutes.includes(pathname);
   const isLoggedIn = !!req.auth;

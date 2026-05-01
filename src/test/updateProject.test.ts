@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
 import prisma from '@/lib/db/client';
+import { getCurrentUserId } from '@/lib/server/auth';
+import { updateProject } from '@/server/actions/projects';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { updateProject } from '@/server/actions/projects';
-import { getCurrentUserId } from '@/lib/utils';
+import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/db/client', () => ({
   default: {
@@ -45,7 +45,7 @@ describe('updateProject', () => {
   });
 
   it('should correctly update an existent project', async () => {
-    vi.mocked(getCurrentUserId).mockReturnValue(1);
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     const formData = new FormData();
     formData.append('projectId', '1');
     formData.append('name', 'abc');

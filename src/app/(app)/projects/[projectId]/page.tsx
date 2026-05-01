@@ -11,7 +11,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { deleteProject } from '@/server/actions/projects';
-import { DialogYesOrNo } from '../../../../components/ui/DialogYesOrNo';
+import { DialogYesOrNo } from '@/components/ui/DialogYesOrNo';
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -22,7 +22,9 @@ export default async function ProjectPage({ params }: Props) {
 
   const numericProjectId = Number(projectId);
 
-  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
+  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
+    notFound();
+  }
 
   const project = await prisma.project.findUnique({
     select: {
@@ -73,32 +75,38 @@ export default async function ProjectPage({ params }: Props) {
           ← Back to projects
         </Link>
       </div>
-      <div className="border-b pb-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Project
-        </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-          {project.name}
-        </h1>
-        <Button asChild>
-          <Link href={`/projects/${projectId}/edit`}>Edit project</Link>
-        </Button>
+      <div className="flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Project
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+            {project.name}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Owned by {project.user.name} · Created{' '}
+            {project.createdAt.toDateString()}
+          </p>
+        </div>
 
-        <DialogYesOrNo
-          title="Delete project?"
-          description={description}
-          confirmText="Delete project"
-          cancelText="Cancel"
-          variant="destructive"
-          action={deleteWithIds}
-        >
-          <Button variant="destructive">Delete project</Button>
-        </DialogYesOrNo>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <Button asChild variant="secondary" className="w-full sm:w-auto">
+            <Link href={`/projects/${projectId}/edit`}>Edit project</Link>
+          </Button>
 
-        <p className="mt-2 text-sm text-muted-foreground">
-          Owned by {project.user.name} · Created{' '}
-          {project.createdAt.toDateString()}
-        </p>
+          <DialogYesOrNo
+            title="Delete project?"
+            description={description}
+            confirmText="Delete project"
+            cancelText="Cancel"
+            variant="destructive"
+            action={deleteWithIds}
+          >
+            <Button variant="destructive" className="w-full sm:w-auto">
+              Delete project
+            </Button>
+          </DialogYesOrNo>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">

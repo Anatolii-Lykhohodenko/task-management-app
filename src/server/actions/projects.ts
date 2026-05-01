@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from '@/lib/db/client';
-import { getCurrentUserId } from '@/lib/utils';
+import { getCurrentUserId } from '@/lib/server/auth';
 import { projectSchema } from '@/schemas/project.schema';
 import { ActionState } from '@/types';
 import { revalidatePath } from 'next/cache';
