@@ -3,7 +3,7 @@
 import prisma from '@/lib/db/client';
 import { loginSchema, registerSchema } from '@/schemas/auth.schema';
 import { ActionState } from '@/types';
-import bcrypt from 'bcryptjs';
+import { hash } from 'bcryptjs';
 import { signIn } from '@/auth';
 
 export async function register(_state: ActionState, formData: FormData) {
@@ -26,7 +26,7 @@ export async function register(_state: ActionState, formData: FormData) {
     return { error: 'User already exists' };
   }
 
-  const cryptedPassword = await bcrypt.hash(password, 10);
+  const cryptedPassword = await hash(password, 10);
 
   await prisma.user.create({
     data: {

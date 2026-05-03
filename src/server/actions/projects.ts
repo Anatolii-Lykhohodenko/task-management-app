@@ -56,11 +56,11 @@ export async function updateProject(
   }
   const { name } = result.data;
 
-    const userId = await getCurrentUserId();
+  const userId = await getCurrentUserId();
 
-    if (!userId) {
-      return { error: 'Unauthorized' };
-    }
+  if (!userId) {
+    return { error: 'Unauthorized' };
+  }
 
   await prisma.project.update({
     where: {
@@ -76,16 +76,37 @@ export async function updateProject(
   redirect(`/projects/${projectId}`);
 }
 
-export async function deleteProject(id : string) {
+export async function deleteProject(id: string, userId: string | null) {
   const projectId = Number(id);
+  const ownerId = Number(userId);
 
-  if (!projectId || Number.isNaN(projectId))
+  if (
+    !projectId ||
+    Number.isNaN(projectId) ||
+    !ownerId ||
+    Number.isNaN(ownerId)
+  ) {
     throw new Error('Project not found');
+  }
+
+  const foundProject = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      ownerId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!foundProject) {
+    throw new Error('Project not found');
+  }
 
   await prisma.project.delete({
     where: {
-      id: projectId,
-    }
+      id: foundProject.id,
+    },
   });
 
   revalidatePath('/projects');

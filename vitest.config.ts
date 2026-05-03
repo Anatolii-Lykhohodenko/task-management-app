@@ -9,5 +9,10 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     globals: true,
     clearMocks: true,
+    server: {
+      deps: {
+        inline: ['server-only'],
+      },
+    },
   },
 });

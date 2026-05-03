@@ -10,9 +10,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { createProject } from '@/server/actions/projects';
+import { getCurrentUserId } from '@/lib/server/auth';
+import { notFound } from 'next/navigation';
 
 export default async function ProjectsPage() {
+  const userId = await getCurrentUserId()
+
+  if (!userId) notFound() 
+
   const projects = await prisma.project.findMany({
+    where: {
+      ownerId: +userId
+    }, 
     orderBy: {
       createdAt: 'desc',
     },

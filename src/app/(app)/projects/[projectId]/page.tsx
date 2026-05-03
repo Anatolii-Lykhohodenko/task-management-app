@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { deleteProject } from '@/server/actions/projects';
 import { DialogYesOrNo } from '@/components/ui/DialogYesOrNo';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -19,10 +20,17 @@ type Props = {
 
 export default async function ProjectPage({ params }: Props) {
   const { projectId } = await params;
+  const userId = await getCurrentUserId();
+  const numericUserId = Number(userId)
 
   const numericProjectId = Number(projectId);
 
-  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
+  if (
+    !Number.isInteger(numericProjectId) ||
+    numericProjectId <= 0 ||
+    numericUserId <= 0 ||
+    !Number.isInteger(numericUserId)
+  ) {
     notFound();
   }
 
@@ -53,12 +61,12 @@ export default async function ProjectPage({ params }: Props) {
       name: true,
       createdAt: true,
     },
-    where: { id: numericProjectId },
+    where: { id: numericProjectId, ownerId: numericUserId },
   });
 
   if (!project) notFound();
 
-  const deleteWithIds = deleteProject.bind(null, projectId);
+  const deleteWithIds = deleteProject.bind(null, projectId, userId ?? null);
   const description = !project._count.tasks
     ? `This will permanently delete the project.`
     : project._count.tasks === 1

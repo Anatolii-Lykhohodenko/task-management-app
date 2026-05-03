@@ -44,6 +44,7 @@
     "eslint-config-next": "16.2.4",
     "jsdom": "^29.0.2",
     "prisma": "^7.7.0",
+    "server-only": "^0.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
