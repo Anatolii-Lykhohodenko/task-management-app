@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { findTaskInProject } from '@/lib/db/queries';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -21,10 +22,21 @@ export default async function EditTaskPage({ params }: Props) {
   const numericProjectId = Number(projectId);
   const numericTaskId = Number(taskId);
 
-  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
-  if (!numericTaskId || Number.isNaN(numericTaskId)) notFound();
+  const userId = await getCurrentUserId();
+  const numericUserId = Number(userId);
 
-  const task = await findTaskInProject(numericTaskId, numericProjectId, {
+  if (
+    !Number.isInteger(numericProjectId) ||
+    numericProjectId <= 0 ||
+    !Number.isInteger(numericTaskId) ||
+    numericTaskId <= 0 ||
+    numericUserId <= 0 ||
+    !Number.isInteger(numericUserId)
+  ) {
+    notFound();
+  }
+
+  const task = await findTaskInProject(numericTaskId, numericProjectId, numericUserId, {
     title: true,
     status: true,
     priority: true,
@@ -63,9 +75,10 @@ export default async function EditTaskPage({ params }: Props) {
         </CardHeader>
         <CardContent>
           <TaskForm
-            projectId={projectId}
+            projectId={numericProjectId}
+            userId={numericUserId}
             serverAction={updateTask}
-            taskId={taskId}
+            taskId={numericTaskId}
             defaultValues={task}
           />
         </CardContent>

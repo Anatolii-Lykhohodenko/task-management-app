@@ -1,4 +1,5 @@
 import RegisterForm from '@/components/auth/RegisterForm';
+import { rootRoute } from '@/lib/routes';
 
 type Props = {
   searchParams: Promise<{ callbackUrl?: string | string[] }>;
@@ -9,5 +10,5 @@ export default async function RegisterPage({ searchParams }: Props) {
     ? params.callbackUrl[0]
     : params.callbackUrl;
 
-  return <RegisterForm callbackUrl={callbackUrl ?? '/projects'} />;
+  return <RegisterForm callbackUrl={callbackUrl ?? rootRoute} />;
 }

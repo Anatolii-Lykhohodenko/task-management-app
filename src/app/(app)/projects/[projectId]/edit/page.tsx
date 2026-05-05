@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { updateProject } from '@/server/actions/projects';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -20,11 +21,22 @@ export default async function EditProjectPage({ params }: Props) {
 
   const numericProjectId = Number(projectId);
 
-  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
+  const userId = await getCurrentUserId();
+  const numericUserId = Number(userId);
+
+  if (
+    !Number.isInteger(numericProjectId) ||
+    numericProjectId <= 0 ||
+    numericUserId <= 0 ||
+    !Number.isInteger(numericUserId)
+  ) {
+    notFound();
+  }
 
   const project = await prisma.project.findUnique({
     where: {
       id: numericProjectId,
+      ownerId: numericUserId,
     },
     select: {
       name: true,

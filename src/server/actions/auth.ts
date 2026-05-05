@@ -4,7 +4,9 @@ import prisma from '@/lib/db/client';
 import { loginSchema, registerSchema } from '@/schemas/auth.schema';
 import { ActionState } from '@/types';
 import { hash } from 'bcryptjs';
-import { signIn } from '@/auth';
+import { signIn, signOut } from '@/auth';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
+import { getSafeCallbackUrl, rootRoute } from '@/lib/routes';
 
 export async function register(_state: ActionState, formData: FormData) {
   const result = registerSchema.safeParse({
@@ -36,13 +38,20 @@ export async function register(_state: ActionState, formData: FormData) {
     },
   });
 
-  const callbackUrl = formData.get('callbackUrl')?.toString() || '/projects';
+  const callbackUrl = getSafeCallbackUrl(
+    formData.get('callbackUrl')?.toString()
+  );
 
-  await signIn('credentials', {
-    email,
-    password,
-    redirectTo: callbackUrl,
-  });
+  try {
+    await signIn('credentials', {
+      email,
+      password,
+      redirectTo: callbackUrl,
+    });
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    return { error: 'Wrong credentials' };
+  }
 
   return { success: true };
 }
@@ -58,13 +67,24 @@ export async function login(_state: ActionState | null, formData: FormData) {
   }
 
   const { email, password } = result.data;
-  const callbackUrl = formData.get('callbackUrl')?.toString() || '/projects';
+  const callbackUrl = getSafeCallbackUrl(
+    formData.get('callbackUrl')?.toString()
+  );
 
-  await signIn('credentials', {
-    email,
-    password,
-    redirectTo:callbackUrl,
-  });
+  try {
+    await signIn('credentials', {
+      email,
+      password,
+      redirectTo: callbackUrl,
+    });
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    return { error: 'Wrong credentials' };
+  }
 
   return { success: true };
+}
+
+export async function signOutAction() {
+  await signOut({ redirectTo: '/auth/login' });
 }

@@ -29,31 +29,12 @@ describe('deleteTask', () => {
     vi.clearAllMocks();
   });
 
-  it('should throw an error if projectId is invalid', async () => {
-    await expect(deleteTask('abc', '2')).rejects.toThrow('Project not found');
-
-    expect(findTaskInProject).not.toHaveBeenCalled();
-    expect(prisma.task.delete).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
-    expect(redirect).not.toHaveBeenCalled();
-  });
-
-  it('should throw an error if taskId is invalid', async () => {
-    await expect(deleteTask('1', 'abc')).rejects.toThrow('Task not found');
-
-    expect(findTaskInProject).not.toHaveBeenCalled();
-    expect(prisma.task.delete).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
-    expect(redirect).not.toHaveBeenCalled();
-  });
-
   it('should correctly delete an existent task', async () => {
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 });
-    await deleteTask('1', '2');
+    await deleteTask(1, 2, 3);
 
-    
-    expect(findTaskInProject).toHaveBeenCalledWith(2, 1, { id: true });
-    expect(prisma.task.delete).toHaveBeenCalledWith({ where: { id: 1 }});
+    expect(findTaskInProject).toHaveBeenCalledWith(2, 1, 3, { id: true });
+    expect(prisma.task.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     expect(revalidatePath).toHaveBeenCalledWith('/projects/1/tasks');
     expect(redirect).toHaveBeenCalledWith('/projects/1/tasks', 'replace');
   });
@@ -61,7 +42,7 @@ describe('deleteTask', () => {
   it('should throw an error if task does not exist', async () => {
     vi.mocked(findTaskInProject).mockResolvedValue(null);
 
-    await expect(deleteTask('1', '2')).rejects.toThrow('Task not found');
+    await expect(deleteTask(1, 2, 3)).rejects.toThrow('Task not found');
 
     expect(prisma.task.delete).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();

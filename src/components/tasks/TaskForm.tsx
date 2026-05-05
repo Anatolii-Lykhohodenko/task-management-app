@@ -23,8 +23,9 @@ type Props = {
     prevState: ActionState,
     formData: FormData
   ) => Promise<ActionState>;
-  projectId: string;
-  taskId?: string;
+  projectId: number;
+  taskId?: number;
+  userId: number;
   defaultValues?: {
     title: string;
     status: Status;
@@ -37,6 +38,7 @@ export function TaskForm({
   serverAction,
   projectId,
   taskId,
+  userId,
   defaultValues,
 }: Props) {
   const [state, action, isPending] = useActionState(serverAction, null);
@@ -109,6 +111,7 @@ export function TaskForm({
 
       <input type="hidden" name="projectId" value={projectId} />
       {taskId && <input type="hidden" name="taskId" value={taskId} />}
+      {userId && <input type="hidden" name="userId" value={userId} />}
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={isPending}>

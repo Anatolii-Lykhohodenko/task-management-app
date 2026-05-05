@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 
 export async function createTask(_prevState: ActionState, formData: FormData) {
   const projectId = Number(formData.get('projectId'));
+  const ownerId = Number(formData.get('userId'));
   const result = taskSchema.safeParse({
     title: formData.get('title'),
     status: formData.get('status'),
@@ -22,6 +23,19 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 
   if (!projectId || Number.isNaN(projectId))
     return { error: 'Project not found' };
+  if (!ownerId || Number.isNaN(ownerId)) return { error: 'Unauthorized' };
+
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      ownerId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!project) return { error: 'Project not found' };
 
   const { title, status, priority, description } = result.data;
 
@@ -29,19 +43,20 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
     data: {
       title,
       description,
-      projectId,
+      projectId: project.id,
       status,
       priority,
     },
   });
 
-  revalidatePath(`/projects/${projectId}/tasks`);
-  redirect(`/projects/${projectId}/tasks`);
+  revalidatePath(`/projects/${project.id}/tasks`);
+  redirect(`/projects/${project.id}/tasks`);
 }
 
 export async function updateTask(_prevState: ActionState, formData: FormData) {
   const projectId = Number(formData.get('projectId'));
   const taskId = Number(formData.get('taskId'));
+  const userId = Number(formData.get('userId'));
 
   const result = taskSchema.safeParse({
     title: formData.get('title'),
@@ -59,8 +74,9 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   if (!projectId || Number.isNaN(projectId))
     return { error: 'Project not found' };
   if (!taskId || Number.isNaN(taskId)) return { error: 'Task not found' };
+  if (!userId || Number.isNaN(userId)) return { error: 'Unauthorized' };
 
-  const task = await findTaskInProject(taskId, projectId, {
+  const task = await findTaskInProject(taskId, projectId, userId, {
     id: true,
   });
 
@@ -82,18 +98,24 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   redirect(`/projects/${projectId}/tasks/${taskId}`);
 }
 
-export async function deleteTask(projectId: string, taskId: string) {
-  const numericProjectId = Number(projectId);
-  const numericTaskId = Number(taskId);
-  if (!projectId || Number.isNaN(numericProjectId)) {
+export async function deleteTask(
+  projectId: number,
+  taskId: number,
+  userId: number
+) {
+  if (!projectId) {
     throw new Error('Project not found');
   }
 
-  if (!taskId || Number.isNaN(numericTaskId)) {
+  if (!taskId) {
     throw new Error('Task not found');
   }
 
-  const task = await findTaskInProject(numericTaskId, numericProjectId, {
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+
+  const task = await findTaskInProject(taskId, projectId, userId, {
     id: true,
   });
 
@@ -107,6 +129,6 @@ export async function deleteTask(projectId: string, taskId: string) {
     },
   });
 
-  revalidatePath(`/projects/${numericProjectId}/tasks`);
-  redirect(`/projects/${numericProjectId}/tasks`, 'replace');
+  revalidatePath(`/projects/${projectId}/tasks`);
+  redirect(`/projects/${projectId}/tasks`, 'replace');
 }

@@ -38,7 +38,7 @@ describe('updateTask', () => {
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Updated description');
     const result = await updateTask(null, formData);
-  
+
     expect(findTaskInProject).not.toHaveBeenCalled();
     expect(prisma.task.update).not.toHaveBeenCalled();
     expect(result).toEqual({ error: 'Project not found' });
@@ -63,15 +63,16 @@ describe('updateTask', () => {
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 });
 
     const formData = new FormData();
-    formData.append('projectId', '2');
     formData.append('taskId', '1');
+    formData.append('projectId', '2');
+    formData.append('userId', '3');
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Updated description');
     await updateTask(null, formData);
 
-    expect(findTaskInProject).toHaveBeenCalledWith(1, 2, { id: true });
+    expect(findTaskInProject).toHaveBeenCalledWith(1, 2, 3, { id: true });
 
     expect(prisma.task.update).toHaveBeenCalledWith({
       where: {
@@ -95,6 +96,7 @@ describe('updateTask', () => {
     const formData = new FormData();
     formData.append('projectId', '2');
     formData.append('taskId', '1');
+    formData.append('userId', '3');
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
@@ -102,6 +104,22 @@ describe('updateTask', () => {
     const result = await updateTask(null, formData);
 
     expect(result).toEqual({ error: 'Task not found' });
+    expect(prisma.task.update).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it('should return an error if user is unauthorized', async () => {
+    const formData = new FormData();
+    formData.append('projectId', '2');
+    formData.append('taskId', '1');
+    formData.append('title', 'Updated task');
+    formData.append('status', 'OPEN');
+    formData.append('priority', 'MEDIUM');
+    formData.append('description', 'Updated description');
+    const result = await updateTask(null, formData);
+
+    expect(result).toEqual({ error: 'Unauthorized' });
     expect(prisma.task.update).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
     expect(redirect).not.toHaveBeenCalled();

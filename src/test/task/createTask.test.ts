@@ -9,6 +9,9 @@ vi.mock('@/lib/db/client', () => ({
     task: {
       create: vi.fn(),
     },
+    project: {
+      findFirst: vi.fn(),
+    },
   },
 }));
 
@@ -52,9 +55,45 @@ describe('createTask', () => {
     expect(redirect).not.toHaveBeenCalled();
   });
 
-  it('should correctly create a task', async () => {
+  it('should return an error if user is not authorized', async () => {
     const formData = new FormData();
     formData.append('projectId', '1');
+    formData.append('userId', 'abc');
+    formData.append('title', 'Created task');
+    formData.append('status', 'OPEN');
+    formData.append('priority', 'MEDIUM');
+    formData.append('description', 'Created description');
+
+    const result = await createTask(null, formData);
+
+    expect(result).toEqual({ error: 'Unauthorized' });
+    expect(prisma.task.create).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it('should return an error if project does not exists', async () => {
+    vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
+    const formData = new FormData();
+    formData.append('projectId', '1');
+    formData.append('userId', '2');
+    formData.append('title', 'Created task');
+    formData.append('status', 'OPEN');
+    formData.append('priority', 'MEDIUM');
+    formData.append('description', 'Created description');
+    const result = await createTask(null, formData);
+
+    expect(result).toEqual({ error: 'Project not found' });
+    expect(prisma.task.create).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it('should correctly create a task', async () => {
+    vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
+    const formData = new FormData();
+    formData.append('projectId', '1');
+    formData.append('userId', '2');
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');

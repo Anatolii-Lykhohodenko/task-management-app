@@ -4,12 +4,16 @@ import { Prisma } from "@prisma/client";
 export async function findTaskInProject<T extends Prisma.TaskSelect>(
   taskId: number,
   projectId: number,
+  ownerId: number,
   select: T
 ) {
   return prisma.task.findFirst({
     where: {
       id: taskId,
       projectId,
+      project: {
+        ownerId,
+      },
     },
     select,
   });

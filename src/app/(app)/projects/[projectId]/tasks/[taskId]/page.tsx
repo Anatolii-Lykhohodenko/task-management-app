@@ -12,6 +12,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { findTaskInProject } from '@/lib/db/queries';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -19,15 +20,25 @@ type Props = {
 
 export default async function TaskPage({ params }: Props) {
   const { projectId, taskId } = await params;
-  const deleteWithIds = deleteTask.bind(null, projectId, taskId);
 
   const numericProjectId = Number(projectId);
   const numericTaskId = Number(taskId);
 
-  if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
-  if (!numericTaskId || Number.isNaN(numericTaskId)) notFound();
+  const userId = await getCurrentUserId();
+  const numericUserId = Number(userId);
 
-  const task = await findTaskInProject(numericTaskId, numericProjectId, {
+  if (
+    !Number.isInteger(numericProjectId) ||
+    numericProjectId <= 0 ||
+    !Number.isInteger(numericTaskId) ||
+    numericTaskId <= 0 ||
+    numericUserId <= 0 ||
+    !Number.isInteger(numericUserId)
+  ) {
+    notFound();
+  }
+
+  const task = await findTaskInProject(numericTaskId, numericProjectId, numericUserId, {
     title: true,
     status: true,
     priority: true,
@@ -36,6 +47,13 @@ export default async function TaskPage({ params }: Props) {
   });
 
   if (!task) notFound();
+
+  const deleteWithIds = deleteTask.bind(
+    null,
+    numericProjectId,
+    numericTaskId,
+    numericUserId
+  );
 
   return (
     <div className="space-y-6">

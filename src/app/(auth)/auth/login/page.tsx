@@ -1,4 +1,5 @@
 import LoginForm from "@/components/auth/LoginForm";
+import { rootRoute } from "@/lib/routes";
 
 type Props = {
   searchParams: Promise<{ callbackUrl?: string | string[] }>;
@@ -12,5 +13,5 @@ export default async function LoginPage({
     ? params.callbackUrl[0]
     : params.callbackUrl;
 
-  return <LoginForm callbackUrl={callbackUrl ?? '/projects'} />;
+  return <LoginForm callbackUrl={callbackUrl ?? rootRoute} />;
 }

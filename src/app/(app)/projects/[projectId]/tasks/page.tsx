@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { notFound } from 'next/navigation';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 type Props = {
   params: Promise<{
@@ -20,14 +21,25 @@ type Props = {
 
 export default async function TasksPage({ params }: Props) {
   const { projectId } = await params;
-    const numericProjectId = Number(projectId);
+  const numericProjectId = Number(projectId);
 
-    if (!numericProjectId || Number.isNaN(numericProjectId)) notFound();
-  
+  const userId = await getCurrentUserId();
+  const numericUserId = Number(userId);
+
+  if (
+    !Number.isInteger(numericProjectId) ||
+    numericProjectId <= 0 ||
+    numericUserId <= 0 ||
+    !Number.isInteger(numericUserId)
+  ) {
+    notFound();
+  }
+
   const [project, tasks] = await Promise.all([
     prisma.project.findUnique({
       where: {
         id: numericProjectId,
+        ownerId: numericUserId,
       },
       select: {
         name: true,
@@ -37,6 +49,9 @@ export default async function TasksPage({ params }: Props) {
     prisma.task.findMany({
       where: {
         projectId: numericProjectId,
+        project: {
+          ownerId: numericUserId,
+        },
       },
       select: {
         id: true,
@@ -121,7 +136,7 @@ export default async function TasksPage({ params }: Props) {
             <CardDescription>Add a new task to this project.</CardDescription>
           </CardHeader>
           <CardContent>
-            <TaskForm projectId={projectId} serverAction={createTask} />
+            <TaskForm projectId={numericProjectId} serverAction={createTask} userId={numericUserId} />
           </CardContent>
         </Card>
       </div>

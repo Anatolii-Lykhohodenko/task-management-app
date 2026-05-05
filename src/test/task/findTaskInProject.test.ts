@@ -24,7 +24,7 @@ describe('findTaskInProject', () => {
       description: 'Test description',
     } as any);
 
-    const result = await findTaskInProject(1, 2, {
+    const result = await findTaskInProject(1, 2, 3, {
       title: true,
       status: true,
       priority: true,
@@ -35,6 +35,9 @@ describe('findTaskInProject', () => {
       where: {
         id: 1,
         projectId: 2,
+        project: {
+          ownerId: 3
+        }
       },
       select: {
         title: true,
@@ -55,7 +58,7 @@ describe('findTaskInProject', () => {
   it('returns null when task does not exist in project', async () => {
     vi.mocked(prisma.task.findFirst).mockResolvedValue(null);
 
-    const result = await findTaskInProject(1, 999, {
+    const result = await findTaskInProject(1, 999, 3, {
       title: true,
       status: true,
       priority: true,
@@ -66,6 +69,9 @@ describe('findTaskInProject', () => {
       where: {
         id: 1,
         projectId: 999,
+        project: {
+          ownerId: 3
+        }
       },
       select: {
         title: true,
@@ -79,7 +85,7 @@ describe('findTaskInProject', () => {
   });
 
   it('calls a function with correct select param', async () => {
-    await findTaskInProject(1, 999, {
+    await findTaskInProject(1, 999, 3, {
       title: true,
       status: false,
       priority: true,
@@ -90,6 +96,9 @@ describe('findTaskInProject', () => {
       where: {
         id: 1,
         projectId: 999,
+        project: {
+          ownerId: 3,
+        },
       },
       select: {
         title: true,
