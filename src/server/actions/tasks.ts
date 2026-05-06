@@ -39,15 +39,20 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 
   const { title, status, priority, description } = result.data;
 
-  await prisma.task.create({
-    data: {
-      title,
-      description,
-      projectId: project.id,
-      status,
-      priority,
-    },
-  });
+  try {
+    await prisma.task.create({
+      data: {
+        title,
+        description,
+        projectId: project.id,
+        status,
+        priority,
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    return { error: message };
+  }
 
   revalidatePath(`/projects/${project.id}/tasks`);
   redirect(`/projects/${project.id}/tasks`);
@@ -76,33 +81,47 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   if (!taskId || Number.isNaN(taskId)) return { error: 'Task not found' };
   if (!userId || Number.isNaN(userId)) return { error: 'Unauthorized' };
 
-  const task = await findTaskInProject(taskId, projectId, userId, {
-    id: true,
+  const task = await findTaskInProject({
+    taskId,
+    projectId,
+    ownerId: userId,
+    select: {
+      id: true,
+    },
   });
 
   if (!task) return { error: 'Task not found' };
 
-  await prisma.task.update({
-    where: {
-      id: task.id,
-    },
-    data: {
-      title,
-      description,
-      status,
-      priority,
-    },
-  });
+  try {
+    await prisma.task.update({
+      where: {
+        id: task.id,
+      },
+      data: {
+        title,
+        description,
+        status,
+        priority,
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    return { error: message };
+  }
 
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
   redirect(`/projects/${projectId}/tasks/${taskId}`);
 }
 
-export async function deleteTask(
-  projectId: number,
-  taskId: number,
-  userId: number
-) {
+export async function deleteTask({
+  projectId,
+  taskId,
+  userId,
+}: {
+  projectId: number;
+  taskId: number;
+  userId: number;
+}) {
   if (!projectId) {
     throw new Error('Project not found');
   }
@@ -115,8 +134,13 @@ export async function deleteTask(
     throw new Error('Unauthorized');
   }
 
-  const task = await findTaskInProject(taskId, projectId, userId, {
-    id: true,
+  const task = await findTaskInProject({
+    taskId,
+    projectId,
+    ownerId: userId,
+    select: {
+      id: true,
+    },
   });
 
   if (!task) {

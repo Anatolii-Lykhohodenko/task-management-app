@@ -24,11 +24,16 @@ describe('findTaskInProject', () => {
       description: 'Test description',
     } as any);
 
-    const result = await findTaskInProject(1, 2, 3, {
-      title: true,
-      status: true,
-      priority: true,
-      description: true,
+    const result = await findTaskInProject({
+      taskId: 1,
+      projectId: 2,
+      ownerId: 3,
+      select: {
+        title: true,
+        status: true,
+        priority: true,
+        description: true,
+      },
     });
 
     expect(prisma.task.findFirst).toHaveBeenCalledWith({
@@ -36,8 +41,8 @@ describe('findTaskInProject', () => {
         id: 1,
         projectId: 2,
         project: {
-          ownerId: 3
-        }
+          ownerId: 3,
+        },
       },
       select: {
         title: true,
@@ -58,11 +63,16 @@ describe('findTaskInProject', () => {
   it('returns null when task does not exist in project', async () => {
     vi.mocked(prisma.task.findFirst).mockResolvedValue(null);
 
-    const result = await findTaskInProject(1, 999, 3, {
-      title: true,
-      status: true,
-      priority: true,
-      description: true,
+    const result = await findTaskInProject({
+      taskId: 1,
+      projectId: 999,
+      ownerId: 3,
+      select: {
+        title: true,
+        status: true,
+        priority: true,
+        description: true,
+      },
     });
 
     expect(prisma.task.findFirst).toHaveBeenCalledWith({
@@ -70,8 +80,8 @@ describe('findTaskInProject', () => {
         id: 1,
         projectId: 999,
         project: {
-          ownerId: 3
-        }
+          ownerId: 3,
+        },
       },
       select: {
         title: true,
@@ -85,11 +95,16 @@ describe('findTaskInProject', () => {
   });
 
   it('calls a function with correct select param', async () => {
-    await findTaskInProject(1, 999, 3, {
-      title: true,
-      status: false,
-      priority: true,
-      description: false,
+    await findTaskInProject({
+      taskId: 1,
+      projectId: 999,
+      ownerId: 3,
+      select: {
+        title: true,
+        status: false,
+        priority: true,
+        description: false,
+      },
     });
 
     expect(prisma.task.findFirst).toHaveBeenCalledWith({

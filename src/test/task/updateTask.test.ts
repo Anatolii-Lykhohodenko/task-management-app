@@ -60,7 +60,7 @@ describe('updateTask', () => {
   });
 
   it('should correctly update an existent task', async () => {
-    vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 });
+    vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
 
     const formData = new FormData();
     formData.append('taskId', '1');
@@ -72,7 +72,7 @@ describe('updateTask', () => {
     formData.append('description', 'Updated description');
     await updateTask(null, formData);
 
-    expect(findTaskInProject).toHaveBeenCalledWith(1, 2, 3, { id: true });
+    expect(findTaskInProject).toHaveBeenCalledWith({ taskId: 1, projectId: 2, ownerId: 3, select: { id: true }});
 
     expect(prisma.task.update).toHaveBeenCalledWith({
       where: {

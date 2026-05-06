@@ -30,10 +30,15 @@ describe('deleteTask', () => {
   });
 
   it('should correctly delete an existent task', async () => {
-    vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 });
-    await deleteTask(1, 2, 3);
+    vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
+    await deleteTask({ projectId: 1, taskId: 2, userId: 3 });
 
-    expect(findTaskInProject).toHaveBeenCalledWith(2, 1, 3, { id: true });
+    expect(findTaskInProject).toHaveBeenCalledWith({
+      taskId: 2,
+      projectId: 1,
+      ownerId: 3,
+      select: { id: true },
+    });
     expect(prisma.task.delete).toHaveBeenCalledWith({ where: { id: 1 } });
     expect(revalidatePath).toHaveBeenCalledWith('/projects/1/tasks');
     expect(redirect).toHaveBeenCalledWith('/projects/1/tasks', 'replace');
@@ -42,7 +47,7 @@ describe('deleteTask', () => {
   it('should throw an error if task does not exist', async () => {
     vi.mocked(findTaskInProject).mockResolvedValue(null);
 
-    await expect(deleteTask(1, 2, 3)).rejects.toThrow('Task not found');
+    await expect(deleteTask({ projectId: 1, taskId: 2, userId: 3 })).rejects.toThrow('Task not found');
 
     expect(prisma.task.delete).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();

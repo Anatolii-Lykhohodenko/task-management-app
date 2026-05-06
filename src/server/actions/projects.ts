@@ -26,12 +26,19 @@ export async function createProject(
     return { error: 'Unauthorized' };
   }
 
-  const newProject = await prisma.project.create({
-    data: {
-      name,
-      ownerId: +userId,
-    },
-  });
+  let newProject;
+
+  try {
+    newProject = await prisma.project.create({
+      data: {
+        name,
+        ownerId: +userId,
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    return { error: message };
+  }
 
   revalidatePath(`/projects/${newProject.id}`);
   redirect(`/projects/${newProject.id}`);
@@ -62,21 +69,31 @@ export async function updateProject(
     return { error: 'Unauthorized' };
   }
 
-  await prisma.project.update({
-    where: {
-      id: projectId,
-      ownerId: +userId,
-    },
-    data: {
-      name,
-    },
-  });
-
+  try {
+    await prisma.project.update({
+      where: {
+        id: projectId,
+        ownerId: +userId,
+      },
+      data: {
+        name,
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    return { error: message };
+  }
   revalidatePath(`/projects/${projectId}`);
   redirect(`/projects/${projectId}`);
 }
 
-export async function deleteProject(id: string, userId: string | null) {
+export async function deleteProject({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string | null;
+}) {
   const projectId = Number(id);
   const ownerId = Number(userId);
 

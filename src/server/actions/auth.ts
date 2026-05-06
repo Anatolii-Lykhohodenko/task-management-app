@@ -6,7 +6,7 @@ import { ActionState } from '@/types';
 import { hash } from 'bcryptjs';
 import { signIn, signOut } from '@/auth';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
-import { getSafeCallbackUrl, rootRoute } from '@/lib/routes';
+import { getSafeCallbackUrl } from '@/lib/routes';
 
 export async function register(_state: ActionState, formData: FormData) {
   const result = registerSchema.safeParse({

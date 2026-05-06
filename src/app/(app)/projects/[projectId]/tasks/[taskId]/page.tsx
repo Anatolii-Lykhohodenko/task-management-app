@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/card';
 import { findTaskInProject } from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
+import CommentForm from '@/components/comment/CommentForm';
+import { createComment, deleteComment } from '@/server/actions/comments';
+import CommentItem from '@/components/comment/CommentItem';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -38,22 +41,45 @@ export default async function TaskPage({ params }: Props) {
     notFound();
   }
 
-  const task = await findTaskInProject(numericTaskId, numericProjectId, numericUserId, {
-    title: true,
-    status: true,
-    priority: true,
-    description: true,
-    createdAt: true,
+  const task = await findTaskInProject({
+    taskId: numericTaskId,
+    projectId: numericProjectId,
+    ownerId: numericUserId,
+    select: {
+      title: true,
+      status: true,
+      priority: true,
+      description: true,
+      createdAt: true,
+      comments: {
+        where: { parentId: null },
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+          text: true,
+          createdAt: true,
+          user: { select: { id: true, name: true } },
+          replies: {
+            orderBy: { createdAt: 'asc' },
+            select: {
+              id: true,
+              text: true,
+              createdAt: true,
+              user: { select: { id: true, name: true } },
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!task) notFound();
 
-  const deleteWithIds = deleteTask.bind(
-    null,
-    numericProjectId,
-    numericTaskId,
-    numericUserId
-  );
+  const deleteTaskWithIds = deleteTask.bind(null, {
+    projectId: numericProjectId,
+    taskId: numericTaskId,
+    userId: numericUserId,
+  });
 
   return (
     <div className="space-y-6">
@@ -101,6 +127,43 @@ export default async function TaskPage({ params }: Props) {
 
           <Card>
             <CardHeader>
+              <CardTitle className="text-base">Comments</CardTitle>
+              <CardDescription>
+                {task.comments.length === 0
+                  ? 'No comments yet'
+                  : `${task.comments.length} comment${task.comments.length === 1 ? '' : 's'}`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {task.comments.length > 0 && (
+                <div className="space-y-4">
+                  {task.comments.map((comment) => {
+                    return (
+                      <CommentItem
+                        deleteAction={deleteComment}
+                        key={comment.id}
+                        comment={comment}
+                        projectId={numericProjectId}
+                        taskId={numericTaskId}
+                        currentUserId={numericUserId}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="border-t pt-4">
+                <CommentForm
+                  serverAction={createComment}
+                  projectId={numericProjectId}
+                  taskId={numericTaskId}
+                  userId={numericUserId}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
               <CardTitle className="text-base">Actions</CardTitle>
               <CardDescription>Update or remove this task</CardDescription>
             </CardHeader>
@@ -117,7 +180,7 @@ export default async function TaskPage({ params }: Props) {
                 confirmText="Delete task"
                 cancelText="Cancel"
                 variant="destructive"
-                action={deleteWithIds}
+                action={deleteTaskWithIds}
               >
                 <Button variant="destructive">Delete task</Button>
               </DialogYesOrNo>

@@ -23,7 +23,7 @@ vi.mock('next/cache', () => ({
 vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }));
-vi.mock('@/lib/utils', () => ({
+vi.mock('@/lib/server/auth', () => ({
   getCurrentUserId: vi.fn(),
 }));
 

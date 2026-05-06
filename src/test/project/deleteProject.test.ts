@@ -31,7 +31,7 @@ describe('deleteProject', () => {
   });
 
   it('should throw an error if projectId is invalid', async () => {
-    await expect(deleteProject('abc', '2')).rejects.toThrow(
+    await expect(deleteProject({ id: 'abc', userId: '2' })).rejects.toThrow(
       'Project not found'
     );
 
@@ -43,7 +43,7 @@ describe('deleteProject', () => {
   it('should throw an error if user does not own a project', async () => {
     vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
 
-    await expect(deleteProject('1', '2')).rejects.toThrow('Project not found');
+    await expect(deleteProject({ id: '1', userId: '2' })).rejects.toThrow('Project not found');
 
     expect(prisma.project.findFirst).toHaveBeenCalledWith({
       where: { id: 1, ownerId: 2 }, select: { id: true }
@@ -61,7 +61,7 @@ describe('deleteProject', () => {
       createdAt: new Date(),
     });
 
-    await deleteProject('1', '2');
+    await deleteProject({ id: '1', userId: '2' });
 
     expect(prisma.project.findFirst).toHaveBeenCalledWith({
       where: { id: 1, ownerId: 2 },

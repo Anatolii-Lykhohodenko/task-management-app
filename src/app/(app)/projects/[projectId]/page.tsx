@@ -66,7 +66,7 @@ export default async function ProjectPage({ params }: Props) {
 
   if (!project) notFound();
 
-  const deleteWithIds = deleteProject.bind(null, projectId, userId ?? null);
+  const deleteWithIds = deleteProject.bind(null, { id: projectId, userId: userId ?? null });
   const description = !project._count.tasks
     ? `This will permanently delete the project.`
     : project._count.tasks === 1
