@@ -1,13 +1,10 @@
 'use client';
 
 import { useActionState } from 'react';
-import { ActionState } from '@/types';
+import { Action } from '@/types';
 
 type Props = {
-  serverAction: (
-    prevState: ActionState | null,
-    formData: FormData
-  ) => Promise<ActionState>;
+  serverAction: Action;
   projectId: number;
   taskId: number;
   commentId: number;

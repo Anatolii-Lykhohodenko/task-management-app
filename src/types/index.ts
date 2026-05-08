@@ -2,3 +2,15 @@ export type ActionState = {
   error?: string;
   success?: boolean;
 } | null;
+
+export type Reply = {
+  id: number;
+  text: string;
+  createdAt: Date;
+  user: { id: number; name: string };
+};
+
+export type Action = (
+  _prevState: ActionState | null,
+  formData: FormData
+) => Promise<ActionState>;

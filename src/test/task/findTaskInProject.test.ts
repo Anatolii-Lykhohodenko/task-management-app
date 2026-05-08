@@ -12,10 +12,6 @@ vi.mock('@/lib/db/client', () => ({
 }));
 
 describe('findTaskInProject', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('returns task when task exists in project', async () => {
     vi.mocked(prisma.task.findFirst).mockResolvedValue({
       title: 'Test task',

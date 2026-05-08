@@ -141,6 +141,7 @@ export default async function TaskPage({ params }: Props) {
                     return (
                       <CommentItem
                         deleteAction={deleteComment}
+                        createComment={createComment}
                         key={comment.id}
                         comment={comment}
                         projectId={numericProjectId}

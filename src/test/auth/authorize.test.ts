@@ -26,10 +26,6 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('authorize', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should return null if credentials are invalid', async () => {
     const result = await authorize({});
 

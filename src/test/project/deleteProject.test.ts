@@ -26,10 +26,6 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('deleteProject', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should throw an error if projectId is invalid', async () => {
     await expect(deleteProject({ id: 'abc', userId: '2' })).rejects.toThrow(
       'Project not found'

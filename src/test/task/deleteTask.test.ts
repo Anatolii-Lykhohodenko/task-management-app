@@ -25,10 +25,6 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('deleteTask', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should correctly delete an existent task', async () => {
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
     await deleteTask({ projectId: 1, taskId: 2, userId: 3 });

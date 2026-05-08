@@ -28,10 +28,6 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('register', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should not register an existent user', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       name: 'Existing user',

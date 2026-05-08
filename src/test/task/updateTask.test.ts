@@ -25,10 +25,6 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('updateTask', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should return an error if projectId is invalid', async () => {
     const formData = new FormData();
     formData.append('projectId', 'abc');

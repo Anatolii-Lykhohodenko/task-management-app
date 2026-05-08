@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { Status, Priority } from '@prisma/client';
-import { ActionState } from '@/types';
+import { Action} from '@/types';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -19,10 +19,7 @@ const statuses = Object.values(Status);
 const priorities = Object.values(Priority);
 
 type Props = {
-  serverAction: (
-    prevState: ActionState,
-    formData: FormData
-  ) => Promise<ActionState>;
+  serverAction: Action;
   projectId: number;
   taskId?: number;
   userId: number;

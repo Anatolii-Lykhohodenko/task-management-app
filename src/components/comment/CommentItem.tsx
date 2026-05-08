@@ -3,21 +3,12 @@
 import { useState } from 'react';
 import CommentForm from '@/components/comment/CommentForm';
 import DeleteCommentButton from '@/components/comment/DeleteCommentButton';
-import { createComment } from '@/server/actions/comments';
-import { ActionState } from '@/types';
-
-type Reply = {
-  id: number;
-  text: string;
-  createdAt: Date;
-  user: { id: number; name: string };
-};
+import { Action, Reply } from '@/types';
+import { updateComment } from '@/server/actions/comments';
+import ReplyItem from '@/components/comment/ReplyItem';
 
 type CommentItemProps = {
-  deleteAction: (
-    prevState: ActionState | null,
-    formData: FormData
-  ) => Promise<ActionState>;
+  deleteAction: Action;
   comment: {
     id: number;
     text: string;
@@ -28,6 +19,7 @@ type CommentItemProps = {
   projectId: number;
   taskId: number;
   currentUserId: number;
+  createComment: Action;
 };
 
 export default function CommentItem({
@@ -36,8 +28,10 @@ export default function CommentItem({
   projectId,
   taskId,
   currentUserId,
+  createComment,
 }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   return (
     <div className="space-y-3">
@@ -54,7 +48,19 @@ export default function CommentItem({
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-foreground">{comment.text}</p>
+          {showEditForm ? (
+            <CommentForm
+              serverAction={updateComment}
+              defaultValues={{ text: comment.text }}
+              projectId={projectId}
+              taskId={taskId}
+              userId={currentUserId}
+              commentId={comment.id}
+              onCancel={() => setShowEditForm(false)}
+            />
+          ) : (
+            <p className="mt-1 text-sm text-foreground">{comment.text}</p>
+          )}
 
           <div className="mt-1.5 flex items-center gap-3">
             <button
@@ -66,12 +72,21 @@ export default function CommentItem({
             </button>
 
             {comment.user.id === currentUserId && (
-              <DeleteCommentButton
-                serverAction={deleteAction}
-                projectId={projectId}
-                taskId={taskId}
-                commentId={comment.id}
-              />
+              <>
+                <DeleteCommentButton
+                  serverAction={deleteAction}
+                  projectId={projectId}
+                  taskId={taskId}
+                  commentId={comment.id}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEditForm((v) => !v)}
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Edit
+                </button>
+              </>
             )}
           </div>
 
@@ -92,33 +107,14 @@ export default function CommentItem({
       {comment.replies.length > 0 && (
         <div className="ml-11 space-y-3 border-l pl-4">
           {comment.replies.map((reply) => (
-            <div key={reply.id} className="flex gap-3">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold uppercase">
-                {reply.user.name[0]}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-sm font-medium">{reply.user.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {reply.createdAt.toLocaleDateString()}
-                  </span>
-                </div>
-
-                <p className="mt-1 text-sm text-foreground">{reply.text}</p>
-
-                {reply.user.id === currentUserId && (
-                  <div className="mt-1.5">
-                    <DeleteCommentButton
-                      serverAction={deleteAction}
-                      projectId={projectId}
-                      taskId={taskId}
-                      commentId={reply.id}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            <ReplyItem
+              key={reply.id}
+              reply={reply}
+              deleteAction={deleteAction}
+              currentUserId={currentUserId}
+              projectId={projectId}
+              taskId={taskId}
+            />
           ))}
         </div>
       )}

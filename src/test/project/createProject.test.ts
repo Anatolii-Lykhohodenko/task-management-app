@@ -26,10 +26,6 @@ vi.mock('@/lib/server/auth', () => ({
 }));
 
 describe('createProject', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should return an error if form data is invalid', async () => {
     const formData = new FormData();
 
