@@ -78,7 +78,6 @@ export default async function TaskPage({ params }: Props) {
   const deleteTaskWithIds = deleteTask.bind(null, {
     projectId: numericProjectId,
     taskId: numericTaskId,
-    userId: numericUserId,
   });
 
   return (

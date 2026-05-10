@@ -32,7 +32,7 @@ vi.mock('next/navigation', () => ({
 
 describe('deleteComment', () => {
   it('should return an error if user is not authorized', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue(undefined);
+    vi.mocked(getCurrentUserId).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('taskId', '1');
     formData.append('projectId', '2');

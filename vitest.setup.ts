@@ -14,3 +14,6 @@ vi.mock('next-auth', () => ({
 vi.mock('next-auth/providers/credentials', () => ({
   default: vi.fn(),
 }));
+beforeEach(() => {
+  vi.resetAllMocks();
+});

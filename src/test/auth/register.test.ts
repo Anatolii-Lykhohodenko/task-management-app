@@ -3,6 +3,7 @@ import { register } from '@/server/actions/auth';
 import prisma from '@/lib/db/client';
 import { signIn } from '@/auth';
 import { rootRoute } from '@/lib/routes';
+import { hash } from 'bcryptjs';
 
 vi.mock('@/lib/db/client', () => ({
   default: {
@@ -20,7 +21,7 @@ vi.mock('@/auth', () => ({
 }));
 
 vi.mock('bcryptjs', () => ({
-  hash: vi.fn().mockResolvedValue('cryptedPassword'),
+  hash: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -28,6 +29,9 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('register', () => {
+  beforeEach(() => {
+    vi.mocked(hash).mockResolvedValue('cryptedPassword' as never);
+  });
   it('should not register an existent user', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue({
       name: 'Existing user',
@@ -84,7 +88,7 @@ describe('register', () => {
     });
   });
 
-  it("should register new user and redirect to callbackUrl if specified ", async () => {
+  it('should register new user and redirect to callbackUrl if specified ', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
     const formData = new FormData();

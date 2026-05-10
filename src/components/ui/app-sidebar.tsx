@@ -1,6 +1,9 @@
 import { NavLink } from "@/components/ui/nav-link";
 
-const navItems = [{ href: '/projects', label: 'Projects' }];
+const navItems = [
+  { href: '/projects', label: 'Projects' },
+  { href: '/dashboard', label: 'Dashboard' },
+];
 
 export default function AppSidebar() {
   return (

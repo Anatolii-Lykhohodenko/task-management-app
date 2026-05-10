@@ -4,6 +4,7 @@ import prisma from '@/lib/db/client';
 import { findTaskInProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 vi.mock('@/lib/db/client', () => ({
   default: {
@@ -24,8 +25,13 @@ vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }));
 
+vi.mock('@/lib/server/auth', () => ({
+  getCurrentUserId: vi.fn(),
+}));
+
 describe('updateTask', () => {
   it('should return an error if projectId is invalid', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     const formData = new FormData();
     formData.append('projectId', 'abc');
     formData.append('taskId', '2');
@@ -41,6 +47,7 @@ describe('updateTask', () => {
   });
 
   it('should return an error if taskId is invalid', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     const formData = new FormData();
     formData.append('projectId', '2');
     formData.append('taskId', 'abc');
@@ -56,12 +63,12 @@ describe('updateTask', () => {
   });
 
   it('should correctly update an existent task', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('3');
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
 
     const formData = new FormData();
     formData.append('taskId', '1');
     formData.append('projectId', '2');
-    formData.append('userId', '3');
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
@@ -87,12 +94,12 @@ describe('updateTask', () => {
   });
 
   it('should return an error if task does not exist', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     vi.mocked(findTaskInProject).mockResolvedValue(null);
 
     const formData = new FormData();
     formData.append('projectId', '2');
     formData.append('taskId', '1');
-    formData.append('userId', '3');
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
@@ -106,6 +113,7 @@ describe('updateTask', () => {
   });
 
   it('should return an error if user is unauthorized', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('projectId', '2');
     formData.append('taskId', '1');

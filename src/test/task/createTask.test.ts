@@ -3,6 +3,7 @@ import prisma from '@/lib/db/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createTask } from '@/server/actions/tasks';
+import { getCurrentUserId } from '@/lib/server/auth';
 
 vi.mock('@/lib/db/client', () => ({
   default: {
@@ -23,8 +24,13 @@ vi.mock('next/navigation', () => ({
   redirect: vi.fn(),
 }));
 
+vi.mock('@/lib/server/auth', () => ({
+  getCurrentUserId: vi.fn(),
+}));
+
 describe('createTask', () => {
   it('should return an error if projectId is invalid', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     const formData = new FormData();
     formData.append('projectId', 'abc');
     formData.append('title', 'Created task');
@@ -40,6 +46,7 @@ describe('createTask', () => {
   });
 
   it('should return an error if form data is invalid', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     const formData = new FormData();
     formData.append('projectId', '1');
 
@@ -52,9 +59,9 @@ describe('createTask', () => {
   });
 
   it('should return an error if user is not authorized', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('projectId', '1');
-    formData.append('userId', 'abc');
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
@@ -69,10 +76,10 @@ describe('createTask', () => {
   });
 
   it('should return an error if project does not exists', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('2');
     vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('projectId', '1');
-    formData.append('userId', '2');
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
@@ -86,10 +93,10 @@ describe('createTask', () => {
   });
 
   it('should correctly create a task', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue('1');
     vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
     const formData = new FormData();
     formData.append('projectId', '1');
-    formData.append('userId', '2');
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');

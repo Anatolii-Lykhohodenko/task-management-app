@@ -136,7 +136,7 @@ export default async function TasksPage({ params }: Props) {
             <CardDescription>Add a new task to this project.</CardDescription>
           </CardHeader>
           <CardContent>
-            <TaskForm projectId={numericProjectId} serverAction={createTask} userId={numericUserId} />
+            <TaskForm projectId={numericProjectId} serverAction={createTask} />
           </CardContent>
         </Card>
       </div>

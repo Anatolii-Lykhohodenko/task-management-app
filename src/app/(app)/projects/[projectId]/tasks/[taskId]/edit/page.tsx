@@ -36,12 +36,12 @@ export default async function EditTaskPage({ params }: Props) {
     notFound();
   }
 
-  const task = await findTaskInProject(numericTaskId, numericProjectId, numericUserId, {
+  const task = await findTaskInProject({ taskId: numericTaskId, projectId: numericProjectId, ownerId: numericUserId, select: {
     title: true,
     status: true,
     priority: true,
     description: true,
-  });
+  }});
 
   if (!task) notFound();
 
@@ -76,7 +76,6 @@ export default async function EditTaskPage({ params }: Props) {
         <CardContent>
           <TaskForm
             projectId={numericProjectId}
-            userId={numericUserId}
             serverAction={updateTask}
             taskId={numericTaskId}
             defaultValues={task}

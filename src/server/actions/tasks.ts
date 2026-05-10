@@ -2,14 +2,21 @@
 
 import prisma from '@/lib/db/client';
 import { findTaskInProject } from '@/lib/db/queries';
+import { getCurrentUserId } from '@/lib/server/auth';
 import { taskSchema } from '@/schemas/task.schema';
 import { ActionState } from '@/types';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createTask(_prevState: ActionState, formData: FormData) {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    return { error: 'Unauthorized' };
+  }
+
+  const ownerId = Number(userId);
   const projectId = Number(formData.get('projectId'));
-  const ownerId = Number(formData.get('userId'));
   const result = taskSchema.safeParse({
     title: formData.get('title'),
     status: formData.get('status'),
@@ -23,7 +30,6 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 
   if (!projectId || Number.isNaN(projectId))
     return { error: 'Project not found' };
-  if (!ownerId || Number.isNaN(ownerId)) return { error: 'Unauthorized' };
 
   const project = await prisma.project.findFirst({
     where: {
@@ -59,9 +65,15 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 }
 
 export async function updateTask(_prevState: ActionState, formData: FormData) {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    return { error: 'Unauthorized' };
+  }
+
+  const ownerId = Number(userId);
   const projectId = Number(formData.get('projectId'));
   const taskId = Number(formData.get('taskId'));
-  const userId = Number(formData.get('userId'));
 
   const result = taskSchema.safeParse({
     title: formData.get('title'),
@@ -79,12 +91,11 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   if (!projectId || Number.isNaN(projectId))
     return { error: 'Project not found' };
   if (!taskId || Number.isNaN(taskId)) return { error: 'Task not found' };
-  if (!userId || Number.isNaN(userId)) return { error: 'Unauthorized' };
 
   const task = await findTaskInProject({
     taskId,
     projectId,
-    ownerId: userId,
+    ownerId,
     select: {
       id: true,
     },
@@ -116,11 +127,9 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
 export async function deleteTask({
   projectId,
   taskId,
-  userId,
 }: {
   projectId: number;
   taskId: number;
-  userId: number;
 }) {
   if (!projectId) {
     throw new Error('Project not found');
@@ -130,14 +139,18 @@ export async function deleteTask({
     throw new Error('Task not found');
   }
 
+  const userId = await getCurrentUserId();
+
   if (!userId) {
     throw new Error('Unauthorized');
   }
 
+  const ownerId = Number(userId);
+
   const task = await findTaskInProject({
     taskId,
     projectId,
-    ownerId: userId,
+    ownerId,
     select: {
       id: true,
     },

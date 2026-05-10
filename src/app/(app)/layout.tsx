@@ -15,7 +15,7 @@ export default async function AppLayout({
     <div className="min-h-screen bg-muted/20">
       <header className="h-14 border-b bg-background">
         <div className="flex h-full items-center justify-between px-6">
-          <Link href="/projects" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-semibold">
               T
             </div>

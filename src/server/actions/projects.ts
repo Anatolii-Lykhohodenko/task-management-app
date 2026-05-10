@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation';
 export async function createProject(
   _prevState: ActionState,
   formData: FormData
-) {
+): Promise<ActionState> {
   const result = projectSchema.safeParse({
     name: formData.get('name'),
   });
@@ -47,7 +47,7 @@ export async function createProject(
 export async function updateProject(
   _prevState: ActionState,
   formData: FormData
-) {
+): Promise<ActionState> {
   const projectId = Number(formData.get('projectId'));
 
   if (!projectId || Number.isNaN(projectId))
@@ -87,13 +87,12 @@ export async function updateProject(
   redirect(`/projects/${projectId}`);
 }
 
-export async function deleteProject({
-  id,
-  userId,
-}: {
-  id: string;
-  userId: string | null;
-}) {
+export async function deleteProject({ id }: { id: string }): Promise<void> {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
   const projectId = Number(id);
   const ownerId = Number(userId);
 
