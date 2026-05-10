@@ -21,22 +21,18 @@ export default async function EditProjectPage({ params }: Props) {
 
   const numericProjectId = Number(projectId);
 
-  const userId = await getCurrentUserId();
-  const numericUserId = Number(userId);
+  const ownerId = await getCurrentUserId();
 
-  if (
-    !Number.isInteger(numericProjectId) ||
-    numericProjectId <= 0 ||
-    numericUserId <= 0 ||
-    !Number.isInteger(numericUserId)
-  ) {
+  if (!ownerId) return null;
+
+  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
     notFound();
   }
 
   const project = await prisma.project.findUnique({
     where: {
       id: numericProjectId,
-      ownerId: numericUserId,
+      ownerId,
     },
     select: {
       name: true,

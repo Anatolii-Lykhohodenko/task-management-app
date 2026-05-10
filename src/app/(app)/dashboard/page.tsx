@@ -11,6 +11,14 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
+import {
+  LayoutGrid,
+  ListTodo,
+  CircleDot,
+  Code,
+  Eye,
+  CheckCircle2,
+} from 'lucide-react';
 
 const STATUS_LABEL: Record<string, string> = {
   OPEN: 'Open',
@@ -33,7 +41,7 @@ export default async function DashboardPage() {
     getRecentComments(),
   ]);
 
-  if ('error' in stats) return <div>Unauthorized</div>;
+  if ('error' in stats) return null;
   const recentTasks = 'error' in tasks ? [] : tasks;
   const recentComments = 'error' in comments ? [] : comments;
 
@@ -45,12 +53,12 @@ export default async function DashboardPage() {
   const closed = stats.tasks.filter((t) => t.status === 'CLOSED').length;
 
   const statCards = [
-    { label: 'Projects', value: stats.projects.length },
-    { label: 'Total Tasks', value: stats.tasks.length },
-    { label: 'Open', value: open },
-    { label: 'In Progress', value: developing },
-    { label: 'Review', value: review },
-    { label: 'Closed', value: closed },
+    { label: 'Projects', value: stats.projects.length, icon: LayoutGrid },
+    { label: 'Total Tasks', value: stats.tasks.length, icon: ListTodo },
+    { label: 'Open', value: open, icon: CircleDot },
+    { label: 'In Progress', value: developing, icon: Code },
+    { label: 'Review', value: review, icon: Eye },
+    { label: 'Closed', value: closed, icon: CheckCircle2 },
   ];
 
   return (
@@ -62,12 +70,22 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        {statCards.map((stat) => (
-          <Card key={stat.label} size="sm">
+        {statCards.map(({ label, value, icon: Icon }) => (
+          <Card key={label} size="sm">
             <CardHeader>
-              <CardDescription>{stat.label}</CardDescription>
-              <CardTitle className="text-2xl font-bold">{stat.value}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardDescription>{label}</CardDescription>
+                <Icon className="h-4 w-4 text-muted-foreground/50" />
+              </div>
+              <CardTitle
+                className={`text-2xl font-bold ${
+                  value === 0 ? 'text-muted-foreground/40' : ''
+                }`}
+              >
+                {value}
+              </CardTitle>
             </CardHeader>
           </Card>
         ))}

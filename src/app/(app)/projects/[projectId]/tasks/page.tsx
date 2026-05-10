@@ -12,60 +12,67 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { notFound } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
+import { getTasks } from '@/lib/db/queries';
+import { Priority, Status } from '@prisma/client';
+import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
+import TaskFilters from '@/components/tasks/TaskFilters';
 
 type Props = {
   params: Promise<{
     projectId: string;
   }>;
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+    priority?: string;
+    sortBy?: 'asc' | 'desc';
+  }>;
 };
 
-export default async function TasksPage({ params }: Props) {
+export default async function TasksPage({ params, searchParams }: Props) {
+  const ownerId = await getCurrentUserId();
+  if (!ownerId) return null;
+
   const { projectId } = await params;
+  const { search, status, priority, sortBy } = await searchParams;
+  const validStatus = TASK_STATUSES.includes(status as Status)
+    ? (status as Status)
+    : null;
+  const validPriority = TASK_PRIORITIES.includes(priority as Priority)
+    ? (priority as Priority)
+    : null;
   const numericProjectId = Number(projectId);
+  const validSortBy = ['asc', 'desc'].includes(sortBy as 'asc' | 'desc')
+    ? (sortBy as 'asc' | 'desc')
+    : 'desc';
 
-  const userId = await getCurrentUserId();
-  const numericUserId = Number(userId);
-
-  if (
-    !Number.isInteger(numericProjectId) ||
-    numericProjectId <= 0 ||
-    numericUserId <= 0 ||
-    !Number.isInteger(numericUserId)
-  ) {
+  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
     notFound();
   }
 
-  const [project, tasks] = await Promise.all([
+  const [project, rawTasks] = await Promise.all([
     prisma.project.findUnique({
       where: {
         id: numericProjectId,
-        ownerId: numericUserId,
+        ownerId,
       },
       select: {
         name: true,
         id: true,
       },
     }),
-    prisma.task.findMany({
-      where: {
-        projectId: numericProjectId,
-        project: {
-          ownerId: numericUserId,
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        priority: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+    getTasks({
+      projectId: numericProjectId,
+      search: search || null,
+      status: validStatus,
+      priority: validPriority,
+      sortBy: validSortBy,
     }),
   ]);
 
   if (!project) notFound();
+
+  const tasks = 'error' in rawTasks ? [] : rawTasks;
 
   return (
     <div className="space-y-6">
@@ -86,6 +93,13 @@ export default async function TasksPage({ params }: Props) {
           Browse and create tasks for {project.name}.
         </p>
       </div>
+
+      <TaskFilters
+        search={search ?? ''}
+        status={validStatus}
+        priority={validPriority}
+        sortBy={validSortBy}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">

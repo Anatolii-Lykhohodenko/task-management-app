@@ -32,7 +32,7 @@ vi.mock('next/navigation', () => ({
 
 describe('createComment', () => {
   it('should return an error if task not found', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1')
+    vi.mocked(getCurrentUserId).mockResolvedValue(1)
     vi.mocked(findTaskInProject).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('taskId', 'abc');
@@ -48,7 +48,7 @@ describe('createComment', () => {
   });
 
   it('should return an error if user is unauthorized', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue(undefined);
+    vi.mocked(getCurrentUserId).mockResolvedValue(null);
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
     const formData = new FormData();
     formData.append('taskId', '1');
@@ -64,7 +64,7 @@ describe('createComment', () => {
   });
 
   it('should return an error if text is not provided', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
     const formData = new FormData();
     formData.append('taskId', '1');
@@ -79,7 +79,7 @@ describe('createComment', () => {
   });
 
   it('should correctly create a comment', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
     const formData = new FormData();
     formData.append('taskId', '1');

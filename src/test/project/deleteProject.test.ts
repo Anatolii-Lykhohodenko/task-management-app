@@ -32,7 +32,7 @@ vi.mock('next/navigation', () => ({
 
 describe('deleteProject', () => {
   it('should throw an error if projectId is invalid', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('2');
+    vi.mocked(getCurrentUserId).mockResolvedValue(2);
     await expect(deleteProject({ id: 'abc' })).rejects.toThrow(
       'Project not found'
     );
@@ -54,7 +54,7 @@ describe('deleteProject', () => {
 
   it('should throw an error if user does not own a project', async () => {
     vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
-    vi.mocked(getCurrentUserId).mockResolvedValue('2');
+    vi.mocked(getCurrentUserId).mockResolvedValue(2);
 
     await expect(deleteProject({ id: '1' })).rejects.toThrow('Project not found');
 
@@ -67,7 +67,7 @@ describe('deleteProject', () => {
   });
 
   it('should correctly delete an existent project', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('2');
+    vi.mocked(getCurrentUserId).mockResolvedValue(2);
     vi.mocked(prisma.project.findFirst).mockResolvedValue({
       id: 1,
       name: 'name',

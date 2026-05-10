@@ -20,13 +20,11 @@ export async function createComment(
     return { error: result.error.issues[0]?.message || 'Invalid form data' };
   }
 
-  const user = await getCurrentUserId();
+  const userId = await getCurrentUserId();
 
-  if (!user) {
+  if (!userId) {
     return { error: 'Unauthorized' };
   }
-
-  const userId = Number(user);
 
   const { text } = result.data;
 
@@ -68,9 +66,9 @@ export async function updateComment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const user = await getCurrentUserId();
+  const userId = await getCurrentUserId();
 
-  if (!user) {
+  if (!userId) {
     return { error: 'Unauthorized' };
   }
 
@@ -81,8 +79,6 @@ export async function updateComment(
   if (!result.success) {
     return { error: result.error.issues[0]?.message || 'Invalid form data' };
   }
-
-  const userId = Number(user);
 
   const { text } = result.data;
 
@@ -138,13 +134,12 @@ export async function deleteComment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const user = await getCurrentUserId();
+  const userId = await getCurrentUserId();
 
-  if (!user) {
+  if (!userId) {
     return { error: 'Unauthorized' };
   }
 
-  const userId = Number(user);
   const taskId = Number(formData.get('taskId'));
   const projectId = Number(formData.get('projectId'));
   const commentId = Number(formData.get('commentId'));

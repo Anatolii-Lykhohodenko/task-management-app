@@ -31,7 +31,7 @@ vi.mock('@/lib/server/auth', () => ({
 
 describe('deleteTask', () => {
   it('should correctly delete an existent task', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('3');
+    vi.mocked(getCurrentUserId).mockResolvedValue(3);
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
     await deleteTask({ projectId: 1, taskId: 2 });
 
@@ -59,7 +59,7 @@ describe('deleteTask', () => {
   });
 
   it('should throw an error if task does not exist', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('3');
+    vi.mocked(getCurrentUserId).mockResolvedValue(3);
     vi.mocked(findTaskInProject).mockResolvedValue(null);
 
     await expect(deleteTask({ projectId: 1, taskId: 2 })).rejects.toThrow(

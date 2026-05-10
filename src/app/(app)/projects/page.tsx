@@ -20,7 +20,7 @@ export default async function ProjectsPage() {
 
   const projects = await prisma.project.findMany({
     where: {
-      ownerId: +userId
+      ownerId: userId
     }, 
     orderBy: {
       createdAt: 'desc',

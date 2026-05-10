@@ -32,7 +32,7 @@ export async function createProject(
     newProject = await prisma.project.create({
       data: {
         name,
-        ownerId: +userId,
+        ownerId: userId,
       },
     });
   } catch (err: unknown) {
@@ -73,7 +73,7 @@ export async function updateProject(
     await prisma.project.update({
       where: {
         id: projectId,
-        ownerId: +userId,
+        ownerId: userId,
       },
       data: {
         name,
@@ -88,19 +88,16 @@ export async function updateProject(
 }
 
 export async function deleteProject({ id }: { id: string }): Promise<void> {
-  const userId = await getCurrentUserId();
+  const ownerId = await getCurrentUserId();
 
-  if (!userId) {
+  if (!ownerId) {
     throw new Error('Unauthorized');
   }
   const projectId = Number(id);
-  const ownerId = Number(userId);
 
   if (
     !projectId ||
-    Number.isNaN(projectId) ||
-    !ownerId ||
-    Number.isNaN(ownerId)
+    Number.isNaN(projectId)
   ) {
     throw new Error('Project not found');
   }

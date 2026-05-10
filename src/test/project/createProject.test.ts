@@ -38,7 +38,7 @@ describe('createProject', () => {
   });
 
   it('should correctly create a project', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(prisma.project.create).mockResolvedValue({
       name: 'abc',
       ownerId: 1,

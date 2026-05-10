@@ -9,13 +9,12 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createTask(_prevState: ActionState, formData: FormData) {
-  const userId = await getCurrentUserId();
+  const ownerId = await getCurrentUserId();
 
-  if (!userId) {
+  if (!ownerId) {
     return { error: 'Unauthorized' };
   }
 
-  const ownerId = Number(userId);
   const projectId = Number(formData.get('projectId'));
   const result = taskSchema.safeParse({
     title: formData.get('title'),
@@ -65,13 +64,12 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 }
 
 export async function updateTask(_prevState: ActionState, formData: FormData) {
-  const userId = await getCurrentUserId();
+  const ownerId = await getCurrentUserId();
 
-  if (!userId) {
+  if (!ownerId) {
     return { error: 'Unauthorized' };
   }
 
-  const ownerId = Number(userId);
   const projectId = Number(formData.get('projectId'));
   const taskId = Number(formData.get('taskId'));
 
@@ -139,13 +137,11 @@ export async function deleteTask({
     throw new Error('Task not found');
   }
 
-  const userId = await getCurrentUserId();
+  const ownerId = await getCurrentUserId();
 
-  if (!userId) {
+  if (!ownerId) {
     throw new Error('Unauthorized');
   }
-
-  const ownerId = Number(userId);
 
   const task = await findTaskInProject({
     taskId,

@@ -20,16 +20,15 @@ type Props = {
 
 export default async function ProjectPage({ params }: Props) {
   const { projectId } = await params;
-  const userId = await getCurrentUserId();
-  const numericUserId = Number(userId)
+  const ownerId = await getCurrentUserId();
+
+  if (!ownerId) return null;
 
   const numericProjectId = Number(projectId);
 
   if (
     !Number.isInteger(numericProjectId) ||
-    numericProjectId <= 0 ||
-    numericUserId <= 0 ||
-    !Number.isInteger(numericUserId)
+    numericProjectId <= 0
   ) {
     notFound();
   }
@@ -61,7 +60,7 @@ export default async function ProjectPage({ params }: Props) {
       name: true,
       createdAt: true,
     },
-    where: { id: numericProjectId, ownerId: numericUserId },
+    where: { id: numericProjectId, ownerId },
   });
 
   if (!project) notFound();

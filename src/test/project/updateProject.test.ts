@@ -41,7 +41,7 @@ describe('updateProject', () => {
   });
 
   it('should correctly update an existent project', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('projectId', '1');
     formData.append('name', 'abc');

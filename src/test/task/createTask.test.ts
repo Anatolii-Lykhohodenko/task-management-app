@@ -30,7 +30,7 @@ vi.mock('@/lib/server/auth', () => ({
 
 describe('createTask', () => {
   it('should return an error if projectId is invalid', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('projectId', 'abc');
     formData.append('title', 'Created task');
@@ -46,7 +46,7 @@ describe('createTask', () => {
   });
 
   it('should return an error if form data is invalid', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('projectId', '1');
 
@@ -76,7 +76,7 @@ describe('createTask', () => {
   });
 
   it('should return an error if project does not exists', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('2');
+    vi.mocked(getCurrentUserId).mockResolvedValue(2);
     vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('projectId', '1');
@@ -93,7 +93,7 @@ describe('createTask', () => {
   });
 
   it('should correctly create a task', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
     const formData = new FormData();
     formData.append('projectId', '1');

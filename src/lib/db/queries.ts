@@ -1,6 +1,6 @@
 import prisma from '@/lib/db/client';
 import { getCurrentUserId } from '@/lib/server/auth';
-import { Prisma } from '@prisma/client';
+import { Priority, Prisma, Status } from '@prisma/client';
 
 export async function findTaskInProject<T extends Prisma.TaskSelect>({
   taskId,
@@ -60,13 +60,11 @@ export async function findCommentInTasks<T extends Prisma.CommentSelect>({
 }
 
 export async function getDashBoardStats() {
-  const userId = await getCurrentUserId();
+  const ownerId = await getCurrentUserId();
 
-  if (!userId) {
+  if (!ownerId) {
     return { error: 'Unauthorized' };
   }
-
-  const ownerId = Number(userId);
 
   const [projects, tasks] = await Promise.all([
     prisma.project.findMany({
@@ -92,13 +90,11 @@ export async function getDashBoardStats() {
 }
 
 export async function getRecentTasks() {
-  const userId = await getCurrentUserId();
+  const ownerId = await getCurrentUserId();
 
-  if (!userId) {
+  if (!ownerId) {
     return { error: 'Unauthorized' };
   }
-
-  const ownerId = Number(userId);
 
   const recentTasks = await prisma.task.findMany({
     where: {
@@ -130,11 +126,9 @@ export async function getRecentComments() {
     return { error: 'Unauthorized' };
   }
 
-  const ownerId = Number(userId);
-
   const recentComments = await prisma.comment.findMany({
     where: {
-      userId: ownerId,
+      userId,
     },
     orderBy: { createdAt: 'desc' },
     take: 5,
@@ -149,13 +143,52 @@ export async function getRecentComments() {
           projectId: true,
           project: {
             select: {
-              name: true
-            }
-          }
+              name: true,
+            },
+          },
         },
       },
     },
   });
 
   return recentComments;
+}
+
+export async function getTasks({
+  projectId,
+  search,
+  status,
+  priority,
+  sortBy = 'desc',
+}: {
+  projectId: number;
+  search: string | null;
+  status: Status | null;
+  priority: Priority | null;
+  sortBy: 'desc' | 'asc';
+}) {
+  const ownerId = await getCurrentUserId();
+
+  if (!ownerId) {
+    return { error: 'Unauthorized' };
+  }
+
+  const query = {
+    where: {
+      project: {
+        ownerId,
+      },
+      projectId,
+      ...(priority && { priority }),
+      ...(status && { status }),
+      ...(search && {
+        title: { contains: search, mode: 'insensitive' as Prisma.QueryMode },
+      }),
+    },
+    orderBy: { createdAt: sortBy },
+    select: { id: true, title: true, status: true, priority: true },
+  };
+  const tasks = await prisma.task.findMany(query);
+
+  return tasks;
 }

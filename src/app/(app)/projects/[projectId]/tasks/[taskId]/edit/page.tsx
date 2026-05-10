@@ -23,25 +23,29 @@ export default async function EditTaskPage({ params }: Props) {
   const numericTaskId = Number(taskId);
 
   const userId = await getCurrentUserId();
-  const numericUserId = Number(userId);
+
+  if (!userId) return null;
 
   if (
     !Number.isInteger(numericProjectId) ||
     numericProjectId <= 0 ||
     !Number.isInteger(numericTaskId) ||
-    numericTaskId <= 0 ||
-    numericUserId <= 0 ||
-    !Number.isInteger(numericUserId)
+    numericTaskId <= 0
   ) {
     notFound();
   }
 
-  const task = await findTaskInProject({ taskId: numericTaskId, projectId: numericProjectId, ownerId: numericUserId, select: {
-    title: true,
-    status: true,
-    priority: true,
-    description: true,
-  }});
+  const task = await findTaskInProject({
+    taskId: numericTaskId,
+    projectId: numericProjectId,
+    ownerId: userId,
+    select: {
+      title: true,
+      status: true,
+      priority: true,
+      description: true,
+    },
+  });
 
   if (!task) notFound();
 

@@ -28,15 +28,13 @@ export default async function TaskPage({ params }: Props) {
   const numericTaskId = Number(taskId);
 
   const userId = await getCurrentUserId();
-  const numericUserId = Number(userId);
+  if (!userId) return null;
 
   if (
     !Number.isInteger(numericProjectId) ||
     numericProjectId <= 0 ||
     !Number.isInteger(numericTaskId) ||
-    numericTaskId <= 0 ||
-    numericUserId <= 0 ||
-    !Number.isInteger(numericUserId)
+    numericTaskId <= 0
   ) {
     notFound();
   }
@@ -44,7 +42,7 @@ export default async function TaskPage({ params }: Props) {
   const task = await findTaskInProject({
     taskId: numericTaskId,
     projectId: numericProjectId,
-    ownerId: numericUserId,
+    ownerId: userId,
     select: {
       title: true,
       status: true,
@@ -145,7 +143,7 @@ export default async function TaskPage({ params }: Props) {
                         comment={comment}
                         projectId={numericProjectId}
                         taskId={numericTaskId}
-                        currentUserId={numericUserId}
+                        currentUserId={userId}
                       />
                     );
                   })}
@@ -157,7 +155,7 @@ export default async function TaskPage({ params }: Props) {
                   serverAction={createComment}
                   projectId={numericProjectId}
                   taskId={numericTaskId}
-                  userId={numericUserId}
+                  userId={userId}
                 />
               </div>
             </CardContent>

@@ -32,7 +32,7 @@ vi.mock('next/navigation', () => ({
 
 describe('updateComment', () => {
   it('should return an error if user is not authorized', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue(undefined);
+    vi.mocked(getCurrentUserId).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('taskId', '1');
     formData.append('projectId', '2');
@@ -47,7 +47,7 @@ describe('updateComment', () => {
   });
 
   it('should return an error if taskId is invalid', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('taskId', 'abc');
     formData.append('projectId', '2');
@@ -63,7 +63,7 @@ describe('updateComment', () => {
   });
 
   it('should return an error if projectId is invalid', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('taskId', '1');
     formData.append('projectId', 'abc');
@@ -79,7 +79,7 @@ describe('updateComment', () => {
   });
 
   it('should return an error if commentId is invalid', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('taskId', '1');
     formData.append('projectId', '2');
@@ -95,7 +95,7 @@ describe('updateComment', () => {
   });
 
   it('should return an error if text is not defined', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('taskId', '1');
     formData.append('projectId', '2');
@@ -110,7 +110,7 @@ describe('updateComment', () => {
   });
 
   it('should return an error if comment is not found', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(findCommentInTasks).mockResolvedValue(null);
     const formData = new FormData();
     formData.append('taskId', '1');
@@ -127,7 +127,7 @@ describe('updateComment', () => {
   });
 
   it('should correctly update a comment', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue('1');
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(findCommentInTasks).mockResolvedValue({ id: 3 } as never);
     const formData = new FormData();
     formData.append('taskId', '1');
