@@ -13,6 +13,8 @@ import { createProject } from '@/server/actions/projects';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { notFound } from 'next/navigation';
 
+export const metadata = { title: 'Projects' };
+
 export default async function ProjectsPage() {
   const userId = await getCurrentUserId()
 

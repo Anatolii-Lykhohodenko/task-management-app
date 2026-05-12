@@ -13,7 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Taskify',
+  title: {
+    template: '%s | Taskify',
+    default: 'Taskify',
+  },
   description: 'Task manager',
 };
 

@@ -2,7 +2,7 @@
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import { Priority, Status } from '@prisma/client';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   Select,
@@ -27,18 +27,22 @@ export default function TaskFilters({
   priority,
   sortBy,
 }: Props) {
+  const [searchValue, setSearchValue] = useState(search);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const updateParam = useCallback((key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    router.push(`?${params.toString()}`);
-  }, [router, searchParams]);
+  const updateParam = useCallback(
+    (key: string, value: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      router.push(`?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
 
   const debounced = useMemo(
     () => debounce((val: string) => updateParam('search', val || null), 500),
@@ -47,13 +51,19 @@ export default function TaskFilters({
 
   const hasFilters = !!search || !!status || !!priority || sortBy !== 'desc';
 
-  const clearFilters = () => router.push('?');
+  const clearFilters = () => {
+    router.push('?');
+    setSearchValue('')
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Input
-        defaultValue={search}
-        onChange={(e) => debounced(e.target.value)}
+        value={searchValue}
+        onChange={(e) => {
+          debounced(e.target.value);
+          setSearchValue(e.target.value);
+        }}
         placeholder="Search tasks..."
         className="h-8 w-48"
       />

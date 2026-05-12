@@ -20,6 +20,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
+export const metadata = { title: 'Dashboard' };
+
 const STATUS_LABEL: Record<string, string> = {
   OPEN: 'Open',
   DEVELOPING: 'In Progress',
@@ -164,3 +166,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+

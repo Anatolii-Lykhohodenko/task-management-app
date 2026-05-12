@@ -29,6 +29,24 @@ type Props = {
   }>;
 };
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
+  const { projectId } = await params;
+  const ownerId = await getCurrentUserId();
+
+  if (!ownerId) return { title: 'Tasks' };
+
+  const project = await prisma.project.findUnique({
+    where: { id: Number(projectId), ownerId },
+    select: { name: true },
+  });
+
+  return { title: project?.name ?? 'Tasks' };
+}
+
 export default async function TasksPage({ params, searchParams }: Props) {
   const ownerId = await getCurrentUserId();
   if (!ownerId) return null;
