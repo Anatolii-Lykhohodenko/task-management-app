@@ -1,7 +1,6 @@
 import { deleteTask } from '@/server/actions/tasks';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DialogYesOrNo } from '../../../../../../components/ui/DialogYesOrNo';
 import {
@@ -16,6 +15,7 @@ import { getCurrentUserId } from '@/lib/server/auth';
 import CommentForm from '@/components/comment/CommentForm';
 import { createComment, deleteComment } from '@/server/actions/comments';
 import CommentItem from '@/components/comment/CommentItem';
+import { TaskProperties } from '@/components/ui/TaskPropeties';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -44,6 +44,7 @@ export default async function TaskPage({ params }: Props) {
     projectId: numericProjectId,
     ownerId: userId,
     select: {
+      id: true,
       title: true,
       status: true,
       priority: true,
@@ -97,8 +98,7 @@ export default async function TaskPage({ params }: Props) {
           {task.title}
         </h1>
         <div className="mt-3 flex items-center gap-2">
-          <Badge variant="secondary">{task.status}</Badge>
-          <Badge variant="outline">{task.priority}</Badge>
+          <TaskProperties task={task} projectId={numericProjectId} />
         </div>
       </div>
 

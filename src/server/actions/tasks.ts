@@ -5,6 +5,7 @@ import { findTaskInProject } from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { taskSchema } from '@/schemas/task.schema';
 import { ActionState } from '@/types';
+import { Status, Priority } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -164,4 +165,51 @@ export async function deleteTask({
 
   revalidatePath(`/projects/${projectId}/tasks`);
   redirect(`/projects/${projectId}/tasks`, 'replace');
+}
+
+export async function updateTaskPartially({
+  projectId,
+  taskId,
+  status,
+  priority,
+}: {
+  projectId: number;
+  taskId: number;
+  status?: Status;
+  priority?: Priority;
+}) {
+  if (!status && !priority) {
+    return;
+  }
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return { error: 'Unauthorized' };
+  }
+
+  const task = await findTaskInProject({
+    taskId,
+    projectId,
+    ownerId: userId,
+    select: {
+      id: true,
+    },
+  });
+
+  if (!task) return { error: 'Task not found' };
+
+  try {
+    await prisma.task.update({
+      where: {
+        id: task.id,
+      },
+      data: {
+        ...(status && { status }),
+        ...(priority && { priority }),
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    return { error: message };
+  }
+  revalidatePath(`/projects/${projectId}/tasks`);
 }

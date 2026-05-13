@@ -9,13 +9,13 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { notFound } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { getTasks } from '@/lib/db/queries';
 import { Priority, Status } from '@prisma/client';
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import TaskFilters from '@/components/tasks/TaskFilters';
+import TaskCard from '@/components/ui/TaskCard';
 
 type Props = {
   params: Promise<{
@@ -139,24 +139,7 @@ export default async function TasksPage({ params, searchParams }: Props) {
           ) : (
             <div className="space-y-3">
               {tasks.map((task) => (
-                <Card
-                  key={task.id}
-                  className="transition-colors hover:bg-muted/40"
-                >
-                  <CardContent className="flex items-center justify-between gap-4 py-4">
-                    <Link
-                      href={`/projects/${projectId}/tasks/${task.id}`}
-                      className="min-w-0 text-sm font-medium hover:underline"
-                    >
-                      <span className="block truncate">{task.title}</span>
-                    </Link>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Badge variant="secondary">{task.status}</Badge>
-                      <Badge variant="outline">{task.priority}</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
+                <TaskCard task={task} projectId={numericProjectId} key={task.id} />
               ))}
             </div>
           )}
