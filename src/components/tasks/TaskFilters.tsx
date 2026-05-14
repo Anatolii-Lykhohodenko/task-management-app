@@ -53,11 +53,11 @@ export default function TaskFilters({
 
   const clearFilters = () => {
     router.push('?');
-    setSearchValue('')
+    setSearchValue('');
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <Input
         value={searchValue}
         onChange={(e) => {
@@ -65,59 +65,68 @@ export default function TaskFilters({
           setSearchValue(e.target.value);
         }}
         placeholder="Search tasks..."
-        className="h-8 w-48"
+        className="h-8 w-full sm:w-48"
       />
 
-      <Select
-        value={status ?? ''}
-        onValueChange={(val) => updateParam('status', val || null)}
-      >
-        <SelectTrigger className="w-36">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          {TASK_STATUSES.map((s) => (
-            <SelectItem key={s} value={s}>
-              {s}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-2 gap-2 sm:contents">
+        <Select
+          value={status ?? ''}
+          onValueChange={(val) => updateParam('status', val || null)}
+        >
+          <SelectTrigger className="w-full sm:w-36">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {TASK_STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={priority ?? ''}
-        onValueChange={(val) => updateParam('priority', val || null)}
-      >
-        <SelectTrigger className="w-36">
-          <SelectValue placeholder="Priority" />
-        </SelectTrigger>
-        <SelectContent>
-          {TASK_PRIORITIES.map((p) => (
-            <SelectItem key={p} value={p}>
-              {p}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          value={priority ?? ''}
+          onValueChange={(val) => updateParam('priority', val || null)}
+        >
+          <SelectTrigger className="w-full sm:w-36">
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            {TASK_PRIORITIES.map((p) => (
+              <SelectItem key={p} value={p}>
+                {p}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <Select
-        value={sortBy}
-        onValueChange={(val) => updateParam('sortBy', val)}
-      >
-        <SelectTrigger className="w-36">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="desc">Newest first</SelectItem>
-          <SelectItem value="asc">Oldest first</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-2 gap-2 sm:contents">
+        <Select
+          value={sortBy}
+          onValueChange={(val) => updateParam('sortBy', val)}
+        >
+          <SelectTrigger className="w-full sm:w-36">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">Newest first</SelectItem>
+            <SelectItem value="asc">Oldest first</SelectItem>
+          </SelectContent>
+        </Select>
 
-      {hasFilters && (
-        <Button variant="ghost" size="sm" onClick={clearFilters}>
-          Clear filters
-        </Button>
-      )}
+        {hasFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="w-full sm:w-auto"
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

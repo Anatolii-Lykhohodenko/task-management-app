@@ -18,7 +18,7 @@ type Props = {
 export default function TaskCard({ task, projectId }: Props) {
   return (
     <Card className="transition-colors hover:bg-muted/40">
-      <CardContent className="flex items-center justify-between gap-4 py-4">
+      <CardContent className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <Link
           href={`/projects/${projectId}/tasks/${task.id}`}
           className="min-w-0 text-sm font-medium hover:underline"

@@ -16,6 +16,7 @@ import { Priority, Status } from '@prisma/client';
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import TaskCard from '@/components/ui/TaskCard';
+import ViewToggle from '@/components/ui/ViewToggle';
 
 type Props = {
   params: Promise<{
@@ -111,6 +112,8 @@ export default async function TasksPage({ params, searchParams }: Props) {
           Browse and create tasks for {project.name}.
         </p>
       </div>
+
+      <ViewToggle projectId={numericProjectId} />
 
       <TaskFilters
         search={search ?? ''}
