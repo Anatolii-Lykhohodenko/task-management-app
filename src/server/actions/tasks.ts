@@ -213,3 +213,28 @@ export async function updateTaskPartially({
   }
   revalidatePath(`/projects/${projectId}/tasks`);
 }
+
+export async function updateTaskStatus({ projectId, taskId, status} : { projectId: number, taskId: number, status: Status}) {
+  const ownerId = await getCurrentUserId()
+
+  if (!ownerId) {
+    throw new Error('Unauthorized');
+  }
+
+  const task = await findTaskInProject({ taskId, projectId, ownerId, select: { id: true }});
+
+  if (!task) {
+    throw new Error('Task not found')
+  }
+
+  await prisma.task.update({
+    where: {
+      id: task.id
+    },
+    data: {
+      status
+    }
+  })
+
+  revalidatePath(`/projects/${projectId}/board`);
+}
