@@ -19,32 +19,35 @@ type Props = {
     priority: Priority;
   };
   projectId: number;
+  skipStatus?: boolean;
 };
 
-export function TaskProperties({ task, projectId }: Props) {
+export function TaskProperties({ task, projectId, skipStatus = false }: Props) {
   return (
     <div className="flex shrink-0 items-center gap-2">
-      <Select
-        defaultValue={task.status}
-        onValueChange={(value) =>
-          updateTaskPartially({
-            taskId: task.id,
-            projectId,
-            status: value as Status,
-          })
-        }
-      >
-        <SelectTrigger className="h-7 w-30 text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {TASK_STATUSES.map((s) => (
-            <SelectItem key={s} value={s} className="text-xs">
-              {s}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {!skipStatus && (
+        <Select
+          defaultValue={task.status}
+          onValueChange={(value) =>
+            updateTaskPartially({
+              taskId: task.id,
+              projectId,
+              status: value as Status,
+            })
+          }
+        >
+          <SelectTrigger className="h-7 w-30 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            {TASK_STATUSES.map((s) => (
+              <SelectItem key={s} value={s} className="text-xs">
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
       <Select
         defaultValue={task.priority}

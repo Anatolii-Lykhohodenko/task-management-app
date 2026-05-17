@@ -163,7 +163,7 @@ export async function getTasks({
 }: {
   projectId: number;
   search: string | null;
-  status: Status | null;
+  status?: Status | null;
   priority: Priority | null;
   sortBy: 'desc' | 'asc';
 }) {

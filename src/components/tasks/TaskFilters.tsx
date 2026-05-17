@@ -16,9 +16,10 @@ import { Button } from '@/components/ui/button';
 
 type Props = {
   search: string;
-  status: Status | null;
+  status?: Status | null;
   priority: Priority | null;
   sortBy: 'asc' | 'desc';
+  skipStatus?: boolean;
 };
 
 export default function TaskFilters({
@@ -26,6 +27,7 @@ export default function TaskFilters({
   status,
   priority,
   sortBy,
+  skipStatus = false,
 }: Props) {
   const [searchValue, setSearchValue] = useState(search);
   const router = useRouter();
@@ -49,7 +51,9 @@ export default function TaskFilters({
     [updateParam]
   );
 
-  const hasFilters = !!search || !!status || !!priority || sortBy !== 'desc';
+  const hasFilters = skipStatus
+    ? !!search || !!priority || sortBy !== 'desc'
+    : !!search || !!status || !!priority || sortBy !== 'desc';
 
   const clearFilters = () => {
     router.push('?');
@@ -69,21 +73,23 @@ export default function TaskFilters({
       />
 
       <div className="grid grid-cols-2 gap-2 sm:contents">
-        <Select
-          value={status ?? ''}
-          onValueChange={(val) => updateParam('status', val || null)}
-        >
-          <SelectTrigger className="w-full sm:w-36">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            {TASK_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {!skipStatus && (
+          <Select
+            value={status ?? ''}
+            onValueChange={(val) => updateParam('status', val || null)}
+          >
+            <SelectTrigger className="w-full sm:w-36">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              {TASK_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Select
           value={priority ?? ''}

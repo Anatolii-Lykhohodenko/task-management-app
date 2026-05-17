@@ -2,12 +2,12 @@ import prisma from '@/lib/db/client';
 import { notFound } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { getTasks } from '@/lib/db/queries';
-import { Priority, Status } from '@prisma/client';
-import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
+import { Priority } from '@prisma/client';
+import { TASK_PRIORITIES } from '@/constants/task';
 import BoardClient from '@/app/(app)/projects/[projectId]/board/BoardClient';
 import Link from 'next/link';
 import ViewToggle from '@/components/ui/ViewToggle';
-
+import TaskFilters from '@/components/tasks/TaskFilters';
 
 type Props = {
   params: Promise<{
@@ -44,10 +44,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
   if (!ownerId) return null;
 
   const { projectId } = await params;
-  const { search, status, priority, sortBy } = await searchParams;
-  const validStatus = TASK_STATUSES.includes(status as Status)
-    ? (status as Status)
-    : null;
+  const { search, priority, sortBy } = await searchParams;
   const validPriority = TASK_PRIORITIES.includes(priority as Priority)
     ? (priority as Priority)
     : null;
@@ -74,7 +71,6 @@ export default async function BoardPage({ params, searchParams }: Props) {
     getTasks({
       projectId: numericProjectId,
       search: search || null,
-      status: validStatus,
       priority: validPriority,
       sortBy: validSortBy,
     }),
@@ -103,7 +99,15 @@ export default async function BoardPage({ params, searchParams }: Props) {
           Board view for {project.name}.
         </p>
       </div>
-      <ViewToggle projectId={numericProjectId} />
+      <ViewToggle
+        projectId={numericProjectId}
+      />
+      <TaskFilters
+        search={search ?? ''}
+        priority={validPriority}
+        sortBy={validSortBy}
+        skipStatus={true}
+      />
       <BoardClient projectId={numericProjectId} initialTasks={tasks} />
     </div>
   );

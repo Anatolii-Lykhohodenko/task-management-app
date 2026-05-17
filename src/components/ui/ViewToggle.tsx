@@ -1,16 +1,28 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { LayoutList, LayoutGrid } from 'lucide-react';
 
-export default function ViewToggle({ projectId }: { projectId: number }) {
+type Props = {
+  projectId: number;
+};
+
+export default function ViewToggle({ projectId }: Props) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchParamsStr = searchParams.toString()
+    ? `?${searchParams.toString()}`
+    : '';
+
+  const listUrl = `/projects/${projectId}/tasks${searchParamsStr}`;
+  const boardUrl = `/projects/${projectId}/board${searchParamsStr}`;
+
   const isBoard = pathname.includes('/board');
 
   return (
     <div className="flex items-center gap-1 rounded-md border bg-muted/40 p-1 w-fit">
       <Link
-        href={`/projects/${projectId}/tasks`}
+        href={listUrl}
         className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-sm transition-colors ${
           !isBoard
             ? 'bg-background text-foreground shadow-sm font-medium'
@@ -21,7 +33,7 @@ export default function ViewToggle({ projectId }: { projectId: number }) {
         List
       </Link>
       <Link
-        href={`/projects/${projectId}/board`}
+        href={boardUrl}
         className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-sm transition-colors ${
           isBoard
             ? 'bg-background text-foreground shadow-sm font-medium'
