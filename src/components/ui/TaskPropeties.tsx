@@ -39,7 +39,12 @@ export function TaskProperties({ task, projectId, skipStatus = false }: Props) {
           <SelectTrigger className="h-7 w-30 text-xs">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent position="popper" sideOffset={4}>
+          <SelectContent
+            position="popper"
+            side="bottom"
+            align="start"
+            sideOffset={4}
+          >
             {TASK_STATUSES.map((s) => (
               <SelectItem key={s} value={s} className="text-xs">
                 {s}
@@ -62,7 +67,12 @@ export function TaskProperties({ task, projectId, skipStatus = false }: Props) {
         <SelectTrigger className="h-7 w-30 text-xs">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
+        <SelectContent
+          position="popper"
+          side="bottom"
+          align="start"
+          sideOffset={4}
+        >
           {TASK_PRIORITIES.map((p) => (
             <SelectItem key={p} value={p} className="text-xs">
               {p}

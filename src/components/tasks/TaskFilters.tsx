@@ -81,7 +81,12 @@ export default function TaskFilters({
             <SelectTrigger className="w-full sm:w-36">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent
+              position="popper"
+              side="bottom"
+              align="start"
+              sideOffset={4}
+            >
               {TASK_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
@@ -98,7 +103,12 @@ export default function TaskFilters({
           <SelectTrigger className="w-full sm:w-36">
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent
+            position="popper"
+            side="bottom"
+            align="start"
+            sideOffset={4}
+          >
             {TASK_PRIORITIES.map((p) => (
               <SelectItem key={p} value={p}>
                 {p}
@@ -116,7 +126,12 @@ export default function TaskFilters({
           <SelectTrigger className="w-full sm:w-36">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent
+            position="popper"
+            side="bottom"
+            align="start"
+            sideOffset={4}
+          >
             <SelectItem value="desc">Newest first</SelectItem>
             <SelectItem value="asc">Oldest first</SelectItem>
           </SelectContent>

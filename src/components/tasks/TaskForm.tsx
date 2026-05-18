@@ -64,7 +64,12 @@ export function TaskForm({
             <SelectTrigger id="status" className="w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent
+              position="popper"
+              side="bottom"
+              align="start"
+              sideOffset={4}
+            >
               {statuses.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
@@ -81,7 +86,12 @@ export function TaskForm({
             <SelectTrigger id="priority" className="w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent
+              position="popper"
+              side="bottom"
+              align="start"
+              sideOffset={4}
+            >
               {priorities.map((p) => (
                 <SelectItem key={p} value={p}>
                   {p}

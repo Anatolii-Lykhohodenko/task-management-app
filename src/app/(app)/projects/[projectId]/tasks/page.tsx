@@ -92,6 +92,7 @@ export default async function TasksPage({ params, searchParams }: Props) {
   if (!project) notFound();
 
   const tasks = 'error' in rawTasks ? [] : rawTasks;
+  const hasFilters = !!search || !!validStatus || !!validPriority;
 
   return (
     <div className="space-y-6">
@@ -134,15 +135,65 @@ export default async function TasksPage({ params, searchParams }: Props) {
           </div>
 
           {tasks.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="flex items-center justify-center py-10">
-                <p className="text-sm text-muted-foreground">No tasks yet</p>
-              </CardContent>
+            <Card className="flex flex-col items-center justify-center border-dashed py-12 text-center shadow-none">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+                {hasFilters ? (
+                  <svg
+                    className="h-6 w-6 text-muted-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-6 w-6 text-muted-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                )}
+              </div>
+              <h3 className="text-lg font-medium text-foreground">
+                {hasFilters ? 'No tasks found' : 'No tasks yet'}
+              </h3>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                {hasFilters
+                  ? "We couldn't find any tasks matching your current filters. Try adjusting them or clear the filters to see all tasks."
+                  : 'You haven’t created any tasks for this project yet. Use the form on the right to add your first task.'}
+              </p>
+              {hasFilters && (
+                <div className="mt-6">
+                  <Link
+                    href={`/projects/${numericProjectId}/tasks`}
+                    className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    Clear all filters
+                  </Link>
+                </div>
+              )}
             </Card>
           ) : (
             <div className="space-y-3">
               {tasks.map((task) => (
-                <TaskCard task={task} projectId={numericProjectId} key={task.id} />
+                <TaskCard
+                  task={task}
+                  projectId={numericProjectId}
+                  key={task.id}
+                />
               ))}
             </div>
           )}
