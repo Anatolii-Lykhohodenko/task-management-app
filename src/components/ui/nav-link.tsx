@@ -11,7 +11,8 @@ type Props = {
 
 export function NavLink({ href, label }: Props) {
   const pathname = usePathname();
-  const isActive = pathname === href || pathname.startsWith(href + '/');
+
+  const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <Link
@@ -22,6 +23,7 @@ export function NavLink({ href, label }: Props) {
           ? 'bg-accent text-accent-foreground'
           : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
       )}
+      aria-current={isActive ? 'page' : undefined}
     >
       {label}
     </Link>

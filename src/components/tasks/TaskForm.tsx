@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
 import { useActionState, useState } from 'react';
 import { Status, Priority } from '@prisma/client';
-import { Action} from '@/types';
+import { Action } from '@/types';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -22,11 +22,16 @@ type Props = {
   serverAction: Action;
   projectId: number;
   taskId?: number;
+  assignees?: { name: string; id: number }[];
   defaultValues?: {
     title: string;
     status: Status;
     priority: Priority;
     description?: string | null;
+    assignee: {
+      id: number;
+      name: string;
+    } | null;
   };
 };
 
@@ -34,6 +39,7 @@ export function TaskForm({
   serverAction,
   projectId,
   taskId,
+  assignees = [],
   defaultValues,
 }: Props) {
   const [state, action, isPending] = useActionState(serverAction, null);
@@ -42,6 +48,11 @@ export function TaskForm({
   );
   const [priority, setPriority] = useState<string>(
     defaultValues?.priority ?? Priority.MEDIUM
+  );
+  const [assigneeId, setAssigneeId] = useState<string>(
+    defaultValues?.assignee?.id
+      ? String(defaultValues.assignee.id)
+      : 'unassigned'
   );
 
   return (
@@ -101,6 +112,33 @@ export function TaskForm({
           </Select>
           <input type="hidden" name="priority" value={priority} />
         </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="assignee">Assignee</Label>
+        <Select onValueChange={setAssigneeId} defaultValue={assigneeId}>
+          <SelectTrigger id="assignee" className="w-full">
+            <SelectValue placeholder="Select assignee" />
+          </SelectTrigger>
+          <SelectContent
+            position="popper"
+            side="bottom"
+            align="start"
+            sideOffset={4}
+          >
+            <SelectItem value="unassigned">Unassigned</SelectItem>
+            {assignees.map((assignee) => (
+              <SelectItem key={assignee.id} value={String(assignee.id)}>
+                {assignee.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <input
+          type="hidden"
+          name="assigneeId"
+          value={assigneeId === 'unassigned' ? '' : assigneeId}
+        />
       </div>
 
       <div className="space-y-1.5">

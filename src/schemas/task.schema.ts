@@ -8,13 +8,15 @@ export const taskSchema = z.object({
     .max(100, { error: 'Title is too long' }),
   description: z.preprocess(
     (value) => (value === '' ? undefined : value),
-    z
-      .string()
-      .max(1000, { error: 'Description is too long' })
-      .optional()
+    z.string().max(1000, { error: 'Description is too long' }).optional()
   ),
   status: z.enum(TASK_STATUSES, { error: 'Invalid status' }),
   priority: z.enum(TASK_PRIORITIES, { error: 'Invalid priority' }),
+  assigneeId: z
+    .string()
+    .refine((value) => value === '' || /^\d+$/.test(value), {
+      error: 'Invalid assignee',
+    }),
 });
 
 

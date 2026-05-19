@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { notFound } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
-import { getTasks } from '@/lib/db/queries';
+import { getAssignees, getTasks } from '@/lib/db/queries';
 import { Priority, Status } from '@prisma/client';
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import TaskFilters from '@/components/tasks/TaskFilters';
@@ -69,7 +69,7 @@ export default async function TasksPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  const [project, rawTasks] = await Promise.all([
+  const [project, rawTasks, assignees] = await Promise.all([
     prisma.project.findUnique({
       where: {
         id: numericProjectId,
@@ -87,6 +87,9 @@ export default async function TasksPage({ params, searchParams }: Props) {
       priority: validPriority,
       sortBy: validSortBy,
     }),
+    getAssignees({
+      projectId: numericProjectId
+    })
   ]);
 
   if (!project) notFound();
@@ -205,7 +208,11 @@ export default async function TasksPage({ params, searchParams }: Props) {
             <CardDescription>Add a new task to this project.</CardDescription>
           </CardHeader>
           <CardContent>
-            <TaskForm projectId={numericProjectId} serverAction={createTask} />
+            <TaskForm
+              projectId={numericProjectId}
+              serverAction={createTask}
+              assignees={assignees}
+            />
           </CardContent>
         </Card>
       </div>

@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { findTaskInProject } from '@/lib/db/queries';
+import { findTaskInProject, getAssignees } from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
 
 type Props = {
@@ -35,17 +35,26 @@ export default async function EditTaskPage({ params }: Props) {
     notFound();
   }
 
-  const task = await findTaskInProject({
-    taskId: numericTaskId,
-    projectId: numericProjectId,
-    ownerId: userId,
-    select: {
-      title: true,
-      status: true,
-      priority: true,
-      description: true,
-    },
-  });
+  const [task, assignees] = await Promise.all([
+    findTaskInProject({
+      taskId: numericTaskId,
+      projectId: numericProjectId,
+      ownerId: userId,
+      select: {
+        title: true,
+        status: true,
+        priority: true,
+        description: true,
+        assignee: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+    }),
+    getAssignees({ projectId: numericProjectId })
+  ]);
 
   if (!task) notFound();
 
@@ -79,6 +88,7 @@ export default async function EditTaskPage({ params }: Props) {
         </CardHeader>
         <CardContent>
           <TaskForm
+            assignees={assignees}
             projectId={numericProjectId}
             serverAction={updateTask}
             taskId={numericTaskId}

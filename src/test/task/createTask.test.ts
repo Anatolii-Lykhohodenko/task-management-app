@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createTask } from '@/server/actions/tasks';
 import { getCurrentUserId } from '@/lib/server/auth';
+import { assigneeExists } from '@/lib/db/queries';
 
 vi.mock('@/lib/db/client', () => ({
   default: {
@@ -28,12 +29,18 @@ vi.mock('@/lib/server/auth', () => ({
   getCurrentUserId: vi.fn(),
 }));
 
+vi.mock('@/lib/db/queries', () => ({
+  assigneeExists: vi.fn(),
+}));
+
 describe('createTask', () => {
   it('should return an error if projectId is invalid', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
     const formData = new FormData();
     formData.append('projectId', 'abc');
     formData.append('title', 'Created task');
+    formData.append('assigneeId', '5');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Created description');
@@ -75,36 +82,41 @@ describe('createTask', () => {
     expect(redirect).not.toHaveBeenCalled();
   });
 
-  it('should return an error if project does not exists', async () => {
+  it('should return an error if assignee does not exist', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(2);
-    vi.mocked(prisma.project.findFirst).mockResolvedValue(null);
-    const formData = new FormData();
-    formData.append('projectId', '1');
-    formData.append('title', 'Created task');
-    formData.append('status', 'OPEN');
-    formData.append('priority', 'MEDIUM');
-    formData.append('description', 'Created description');
-    const result = await createTask(null, formData);
-
-    expect(result).toEqual({ error: 'Project not found' });
-    expect(prisma.task.create).not.toHaveBeenCalled();
-    expect(revalidatePath).not.toHaveBeenCalled();
-    expect(redirect).not.toHaveBeenCalled();
-  });
-
-  it('should correctly create a task', async () => {
-    vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(assigneeExists).mockResolvedValue(false);
     vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
     const formData = new FormData();
     formData.append('projectId', '1');
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
+    formData.append('assigneeId', '5');
+    formData.append('description', 'Created description');
+    const result = await createTask(null, formData);
+
+    expect(result).toEqual({ error: 'Assignee not found' });
+    expect(prisma.task.create).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it('should correctly create a task with assignee', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
+    vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
+    const formData = new FormData();
+    formData.append('projectId', '1');
+    formData.append('title', 'Created task');
+    formData.append('status', 'OPEN');
+    formData.append('assigneeId', '5');
+    formData.append('priority', 'MEDIUM');
     formData.append('description', 'Created description');
 
     await createTask(null, formData);
     expect(prisma.task.create).toHaveBeenCalledWith({
       data: {
+        assigneeId: 5,
         projectId: 1,
         title: 'Created task',
         status: 'OPEN',
@@ -112,6 +124,33 @@ describe('createTask', () => {
         description: 'Created description',
       },
     });
+    expect(revalidatePath).toHaveBeenCalledWith('/projects/1/tasks');
+    expect(redirect).toHaveBeenCalledWith('/projects/1/tasks');
+  });
+
+  it('should correctly create a task without assignee', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
+    const formData = new FormData();
+    formData.append('projectId', '1');
+    formData.append('title', 'Created task');
+    formData.append('status', 'OPEN');
+    formData.append('assigneeId', '');
+    formData.append('priority', 'MEDIUM');
+    formData.append('description', 'Created description');
+
+    await createTask(null, formData);
+    expect(prisma.task.create).toHaveBeenCalledWith({
+      data: {
+        assigneeId: null,
+        projectId: 1,
+        title: 'Created task',
+        status: 'OPEN',
+        priority: 'MEDIUM',
+        description: 'Created description',
+      },
+    });
+    expect(assigneeExists).not.toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/projects/1/tasks');
     expect(redirect).toHaveBeenCalledWith('/projects/1/tasks');
   });

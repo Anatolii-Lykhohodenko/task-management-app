@@ -49,6 +49,11 @@ export default async function TaskPage({ params }: Props) {
       status: true,
       priority: true,
       description: true,
+      assignee: {
+        select: {
+          name: true
+        }
+      },
       createdAt: true,
       comments: {
         where: { parentId: null },
@@ -193,6 +198,12 @@ export default async function TaskPage({ params }: Props) {
               <CardDescription>Context fields for this task</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Assignee
+                </p>
+                <p className="mt-1 font-medium">{task.assignee?.name ?? 'Unassigned'}</p>
+              </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Status

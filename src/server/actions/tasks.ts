@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from '@/lib/db/client';
-import { findTaskInProject } from '@/lib/db/queries';
+import { assigneeExists, findTaskInProject } from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { taskSchema } from '@/schemas/task.schema';
 import { ActionState } from '@/types';
@@ -9,6 +9,10 @@ import { Status, Priority } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+function parseAssigneeId(value: string) {
+  const parsed = Number(value);
+  return parsed > 0 ? parsed : null;
+}
 export async function createTask(_prevState: ActionState, formData: FormData) {
   const ownerId = await getCurrentUserId();
 
@@ -22,6 +26,7 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
     status: formData.get('status'),
     priority: formData.get('priority'),
     description: formData.get('description'),
+    assigneeId: formData.get('assigneeId'),
   });
 
   if (!result.success) {
@@ -43,7 +48,14 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 
   if (!project) return { error: 'Project not found' };
 
-  const { title, status, priority, description } = result.data;
+  const { title, status, priority, description, assigneeId } = result.data;
+
+const preparedAssigneeId = parseAssigneeId(assigneeId);
+
+if (preparedAssigneeId) {
+  const isAssigneeExist = await assigneeExists(preparedAssigneeId);
+  if (!isAssigneeExist) return { error: 'Assignee not found' };
+}
 
   try {
     await prisma.task.create({
@@ -51,6 +63,7 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
         title,
         description,
         projectId: project.id,
+        assigneeId: preparedAssigneeId,
         status,
         priority,
       },
@@ -79,13 +92,21 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
     status: formData.get('status'),
     priority: formData.get('priority'),
     description: formData.get('description'),
+    assigneeId: formData.get('assigneeId'),
   });
 
   if (!result.success) {
     return { error: result.error.issues[0]?.message ?? 'Invalid form data' };
   }
 
-  const { title, status, priority, description } = result.data;
+  const { title, status, priority, description, assigneeId } = result.data;
+
+const preparedAssigneeId = parseAssigneeId(assigneeId);
+
+if (preparedAssigneeId) {
+  const isAssigneeExist = await assigneeExists(preparedAssigneeId);
+  if (!isAssigneeExist) return { error: 'Assignee not found' };
+}
 
   if (!projectId || Number.isNaN(projectId))
     return { error: 'Project not found' };
@@ -110,6 +131,7 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
       data: {
         title,
         description,
+        assigneeId: preparedAssigneeId,
         status,
         priority,
       },
@@ -214,27 +236,40 @@ export async function updateTaskPartially({
   revalidatePath(`/projects/${projectId}/tasks`);
 }
 
-export async function updateTaskStatus({ projectId, taskId, status} : { projectId: number, taskId: number, status: Status}) {
-  const ownerId = await getCurrentUserId()
+export async function updateTaskStatus({
+  projectId,
+  taskId,
+  status,
+}: {
+  projectId: number;
+  taskId: number;
+  status: Status;
+}) {
+  const ownerId = await getCurrentUserId();
 
   if (!ownerId) {
     throw new Error('Unauthorized');
   }
 
-  const task = await findTaskInProject({ taskId, projectId, ownerId, select: { id: true }});
+  const task = await findTaskInProject({
+    taskId,
+    projectId,
+    ownerId,
+    select: { id: true },
+  });
 
   if (!task) {
-    throw new Error('Task not found')
+    throw new Error('Task not found');
   }
 
   await prisma.task.update({
     where: {
-      id: task.id
+      id: task.id,
     },
     data: {
-      status
-    }
-  })
+      status,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}/board`);
 }

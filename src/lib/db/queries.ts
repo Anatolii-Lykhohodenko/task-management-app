@@ -192,3 +192,36 @@ export async function getTasks({
 
   return tasks;
 }
+
+export async function getAssignees({ projectId }: { projectId: number }) {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    throw new Error('Unauthorized');
+  }
+
+  const assignees = await prisma.user.findMany({
+    where: {
+      // add user-project relation in future
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return assignees;
+}
+
+export async function assigneeExists(assigneeId: number) {
+  const assignee = await prisma.user.findUnique({
+    where: {
+      id: assigneeId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return !!assignee;
+}

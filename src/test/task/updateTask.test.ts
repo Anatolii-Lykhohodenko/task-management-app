@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { updateTask } from '@/server/actions/tasks';
 import prisma from '@/lib/db/client';
-import { findTaskInProject } from '@/lib/db/queries';
+import { assigneeExists, findTaskInProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
@@ -15,6 +15,7 @@ vi.mock('@/lib/db/client', () => ({
 }));
 vi.mock('@/lib/db/queries', () => ({
   findTaskInProject: vi.fn(),
+  assigneeExists: vi.fn(),
 }));
 
 vi.mock('next/cache', () => ({
@@ -31,11 +32,13 @@ vi.mock('@/lib/server/auth', () => ({
 
 describe('updateTask', () => {
   it('should return an error if projectId is invalid', async () => {
+    vi.mocked(assigneeExists).mockResolvedValue(true);
     vi.mocked(getCurrentUserId).mockResolvedValue(1);
     const formData = new FormData();
     formData.append('projectId', 'abc');
     formData.append('taskId', '2');
     formData.append('title', 'Updated task');
+    formData.append('assigneeId', '5');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Updated description');
@@ -46,13 +49,33 @@ describe('updateTask', () => {
     expect(result).toEqual({ error: 'Project not found' });
   });
 
+  it('should return an error if assignee does not exist', async () => {
+    vi.mocked(assigneeExists).mockResolvedValue(false);
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    const formData = new FormData();
+    formData.append('projectId', '1');
+    formData.append('taskId', '2');
+    formData.append('title', 'Updated task');
+    formData.append('assigneeId', '5');
+    formData.append('status', 'OPEN');
+    formData.append('priority', 'MEDIUM');
+    formData.append('description', 'Updated description');
+    const result = await updateTask(null, formData);
+
+    expect(findTaskInProject).not.toHaveBeenCalled();
+    expect(prisma.task.update).not.toHaveBeenCalled();
+    expect(result).toEqual({ error: 'Assignee not found' });
+  });
+
   it('should return an error if taskId is invalid', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
     const formData = new FormData();
     formData.append('projectId', '2');
     formData.append('taskId', 'abc');
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
+    formData.append('assigneeId', '5');
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Updated description');
     const result = await updateTask(null, formData);
@@ -62,8 +85,9 @@ describe('updateTask', () => {
     expect(result).toEqual({ error: 'Task not found' });
   });
 
-  it('should correctly update an existent task', async () => {
+  it('should correctly update an existent task with assignee', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(3);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
 
     const formData = new FormData();
@@ -72,16 +96,23 @@ describe('updateTask', () => {
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
+    formData.append('assigneeId', '5');
     formData.append('description', 'Updated description');
     await updateTask(null, formData);
 
-    expect(findTaskInProject).toHaveBeenCalledWith({ taskId: 1, projectId: 2, ownerId: 3, select: { id: true }});
+    expect(findTaskInProject).toHaveBeenCalledWith({
+      taskId: 1,
+      projectId: 2,
+      ownerId: 3,
+      select: { id: true },
+    });
 
     expect(prisma.task.update).toHaveBeenCalledWith({
       where: {
         id: 1,
       },
       data: {
+        assigneeId: 5,
         title: 'Updated task',
         status: 'OPEN',
         priority: 'MEDIUM',
@@ -93,13 +124,49 @@ describe('updateTask', () => {
     expect(redirect).toHaveBeenCalledWith('/projects/2/tasks/1');
   });
 
+  it('should correctly update an existent task without assignee', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(3);
+    vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
+
+    const formData = new FormData();
+    formData.append('taskId', '1');
+    formData.append('projectId', '2');
+    formData.append('title', 'Updated task');
+    formData.append('status', 'OPEN');
+    formData.append('priority', 'MEDIUM');
+    formData.append('assigneeId', '');
+    formData.append('description', 'Updated description');
+    await updateTask(null, formData);
+
+    expect(findTaskInProject).toHaveBeenCalledWith({ taskId: 1, projectId: 2, ownerId: 3, select: { id: true }});
+
+    expect(prisma.task.update).toHaveBeenCalledWith({
+      where: {
+        id: 1,
+      },
+      data: {
+        assigneeId: null,
+        title: 'Updated task',
+        status: 'OPEN',
+        priority: 'MEDIUM',
+        description: 'Updated description',
+      },
+    });
+
+    expect(assigneeExists).not.toHaveBeenCalled();
+    expect(revalidatePath).toHaveBeenCalledWith('/projects/2/tasks/1');
+    expect(redirect).toHaveBeenCalledWith('/projects/2/tasks/1');
+  });
+
   it('should return an error if task does not exist', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
     vi.mocked(findTaskInProject).mockResolvedValue(null);
 
     const formData = new FormData();
     formData.append('projectId', '2');
     formData.append('taskId', '1');
+    formData.append('assigneeId', '5');
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
