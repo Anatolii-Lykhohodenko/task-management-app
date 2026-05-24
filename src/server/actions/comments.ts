@@ -45,14 +45,23 @@ export async function createComment(
   }
 
   try {
-    await prisma.comment.create({
-      data: {
-        text,
-        taskId: task.id,
-        parentId,
-        userId,
-      },
-    });
+    await Promise.all([
+      prisma.comment.create({
+        data: {
+          text,
+          taskId: task.id,
+          parentId,
+          userId,
+        },
+      }),
+      prisma.activityLog.create({
+        data: {
+          taskId,
+          userId,
+          activityType: 'COMMENT_ADDED',
+        },
+      }),
+    ]);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Something went wrong';
     return { error: message };

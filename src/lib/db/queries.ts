@@ -246,3 +246,31 @@ export async function assigneeExists(assigneeId: number) {
 
   return !!assignee;
 }
+
+export async function getActivityLogs({ taskId }: { taskId: number }) {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    return { error: 'Unauthorized' };
+  }
+
+  const logs = await prisma.activityLog.findMany({
+    where: {
+      taskId,
+    },
+    select: {
+      id: true,
+      payload: true,
+      activityType: true,
+      createdAt: true,
+      user: {
+        select: {
+          name: true
+        }
+      }
+    },
+    orderBy: { 'createdAt': 'asc' }
+  });
+
+  return logs;
+}

@@ -19,7 +19,7 @@ import BoardCard from '@/components/ui/BoardCard';
 
 type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'> & {
   assignee: { name: string } | null;
-  dueDate: Date | null
+  dueDate: Date | null;
 };
 
 type Props = {

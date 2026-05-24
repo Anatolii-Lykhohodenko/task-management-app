@@ -19,6 +19,8 @@ type Props = {
     search?: string;
     priority?: string;
     sortBy?: SortByParam;
+    myTasks?: string;
+    overdue?: string;
   }>;
 };
 
@@ -45,7 +47,8 @@ export default async function BoardPage({ params, searchParams }: Props) {
   if (!ownerId) return null;
 
   const { projectId } = await params;
-  const { search, priority, sortBy } = await searchParams;
+  const { search, priority, sortBy, myTasks, overdue } =
+    await searchParams;
   const validPriority = TASK_PRIORITIES.includes(priority as Priority)
     ? (priority as Priority)
     : null;
@@ -72,6 +75,8 @@ export default async function BoardPage({ params, searchParams }: Props) {
       search: search || null,
       priority: validPriority,
       sortBy: validSortBy,
+      assigneeId: myTasks === 'true' ? ownerId : undefined,
+      overdue: overdue === 'true',
     }),
   ]);
 
@@ -82,6 +87,8 @@ export default async function BoardPage({ params, searchParams }: Props) {
   const hasFilters =
     !!search ||
     !!validPriority ||
+    myTasks === 'true' ||
+    overdue === 'true' ||
     (sortBy ?? 'createdAt_desc') !== 'createdAt_desc';
 
   return (
@@ -108,6 +115,8 @@ export default async function BoardPage({ params, searchParams }: Props) {
         search={search ?? ''}
         priority={validPriority}
         sortBy={sortBy ?? 'createdAt_desc'}
+        myTasks={myTasks === 'true'}
+        overdue={overdue === 'true'}
         skipStatus={true}
       />
       {tasks.length === 0 ? (
@@ -163,7 +172,11 @@ export default async function BoardPage({ params, searchParams }: Props) {
           )}
         </div>
       ) : (
-        <BoardClient projectId={numericProjectId} initialTasks={tasks} />
+        <BoardClient
+          key={`${search ?? ''}-${validPriority ?? ''}-${validSortBy}-${myTasks}-${overdue}`}
+          projectId={numericProjectId}
+          initialTasks={tasks}
+        />
       )}
     </div>
   );

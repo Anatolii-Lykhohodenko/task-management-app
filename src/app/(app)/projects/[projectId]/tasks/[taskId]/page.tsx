@@ -10,12 +10,13 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/ui/card';
-import { findTaskInProject } from '@/lib/db/queries';
+import { findTaskInProject, getActivityLogs } from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
 import CommentForm from '@/components/comment/CommentForm';
 import { createComment, deleteComment } from '@/server/actions/comments';
 import CommentItem from '@/components/comment/CommentItem';
 import { TaskProperties } from '@/components/ui/TaskPropeties';
+import ActivityLog from '@/components/ui/ActivityLog';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -79,6 +80,8 @@ export default async function TaskPage({ params }: Props) {
   });
 
   if (!task) notFound();
+
+  const logs = await getActivityLogs({ taskId: numericTaskId });
 
   const deleteTaskWithIds = deleteTask.bind(null, {
     projectId: numericProjectId,
@@ -260,6 +263,7 @@ export default async function TaskPage({ params }: Props) {
               </div>
             </CardContent>
           </Card>
+          <ActivityLog logs={'error' in logs ? [] : logs} />
         </div>
       </div>
     </div>

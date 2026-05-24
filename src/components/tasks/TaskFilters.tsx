@@ -47,6 +47,7 @@ export default function TaskFilters({
         params.delete(key);
       }
       router.push(`?${params.toString()}`);
+      router.refresh()
     },
     [router, searchParams]
   );
