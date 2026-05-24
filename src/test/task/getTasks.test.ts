@@ -24,7 +24,7 @@ describe('getTasks', () => {
       search: null,
       status: null,
       priority: null,
-      sortBy: 'desc',
+      sortBy: { createdAt: 'desc' },
     });
 
     expect(result).toEqual({ error: 'Unauthorized' });
@@ -42,7 +42,7 @@ describe('getTasks', () => {
       search: null,
       status: null,
       priority: null,
-      sortBy: 'desc',
+      sortBy: { createdAt: 'desc' },
     });
 
     expect(prisma.task.findMany).toHaveBeenCalledWith({
@@ -53,7 +53,18 @@ describe('getTasks', () => {
         projectId: 1,
       },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true, status: true, priority: true },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        assignee: {
+          select: {
+            name: true,
+          },
+        },
+        dueDate: true,
+      },
     });
 
     expect(result).toEqual([
@@ -61,7 +72,7 @@ describe('getTasks', () => {
     ]);
   });
 
-  it('returns tasks when they are exist and task filters/sorters are given', async () => {
+  it('returns tasks when they are exist and task filters/sorters are given(createdAt)', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(prisma.task.findMany).mockResolvedValue([
       { id: 3, title: 'title', status: 'DEVELOPING', priority: 'HIGH' },
@@ -72,7 +83,7 @@ describe('getTasks', () => {
       search: 'task',
       status: 'DEVELOPING',
       priority: 'HIGH',
-      sortBy: 'asc',
+      sortBy: { createdAt: 'asc' },
     });
 
     expect(prisma.task.findMany).toHaveBeenCalledWith({
@@ -86,7 +97,62 @@ describe('getTasks', () => {
         projectId: 1,
       },
       orderBy: { createdAt: 'asc' },
-      select: { id: true, title: true, status: true, priority: true },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        assignee: {
+          select: {
+            name: true,
+          },
+        },
+        dueDate: true,
+      },
+    });
+
+    expect(result).toEqual([
+      { id: 3, title: 'title', status: 'DEVELOPING', priority: 'HIGH' },
+    ]);
+  });
+
+  it('returns tasks when they are exist and task filters/sorters are given(dueDate)', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(prisma.task.findMany).mockResolvedValue([
+      { id: 3, title: 'title', status: 'DEVELOPING', priority: 'HIGH' },
+    ] as never);
+
+    const result = await getTasks({
+      projectId: 1,
+      search: 'task',
+      status: 'DEVELOPING',
+      priority: 'HIGH',
+      sortBy: { dueDate: 'asc' },
+    });
+
+    expect(prisma.task.findMany).toHaveBeenCalledWith({
+      where: {
+        project: {
+          ownerId: 1,
+        },
+        status: 'DEVELOPING',
+        priority: 'HIGH',
+        title: { contains: 'task', mode: 'insensitive' },
+        projectId: 1,
+      },
+      orderBy: { dueDate: 'asc' },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        assignee: {
+          select: {
+            name: true,
+          },
+        },
+        dueDate: true,
+      },
     });
 
     expect(result).toEqual([
@@ -103,7 +169,7 @@ describe('getTasks', () => {
       search: 'task',
       status: 'DEVELOPING',
       priority: 'HIGH',
-      sortBy: 'asc',
+      sortBy: { createdAt: 'asc' },
     });
 
     expect(prisma.task.findMany).toHaveBeenCalledWith({
@@ -117,7 +183,18 @@ describe('getTasks', () => {
         projectId: 4,
       },
       orderBy: { createdAt: 'asc' },
-      select: { id: true, title: true, status: true, priority: true },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        assignee: {
+          select: {
+            name: true,
+          },
+        },
+        dueDate: true,
+      },
     });
 
     expect(result).toEqual([]);

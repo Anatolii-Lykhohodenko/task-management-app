@@ -49,6 +49,7 @@ model Task {
   status      Status   @default(OPEN)
   priority    Priority @default(MEDIUM)
   createdAt   DateTime @default(now())
+  dueDate   DateTime? 
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId Int

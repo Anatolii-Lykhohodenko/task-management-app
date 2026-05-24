@@ -1,5 +1,6 @@
 import prisma from '@/lib/db/client';
 import { getCurrentUserId } from '@/lib/server/auth';
+import { SortByType } from '@/types';
 import { Priority, Prisma, Status } from '@prisma/client';
 
 export async function findTaskInProject<T extends Prisma.TaskSelect>({
@@ -159,13 +160,17 @@ export async function getTasks({
   search,
   status,
   priority,
-  sortBy = 'desc',
+  overdue,
+  assigneeId,
+  sortBy = { createdAt: 'desc' },
 }: {
   projectId: number;
   search: string | null;
   status?: Status | null;
   priority: Priority | null;
-  sortBy: 'desc' | 'asc';
+  sortBy: SortByType;
+  overdue?: boolean;
+  assigneeId?: number;
 }) {
   const ownerId = await getCurrentUserId();
 
@@ -180,13 +185,29 @@ export async function getTasks({
       },
       projectId,
       ...(priority && { priority }),
-      ...(status && { status }),
+      ...(status && !overdue && { status }),
+      ...(assigneeId && { assigneeId }),
+      ...(overdue && {
+        dueDate: { lt: new Date() },
+        status: { not: 'CLOSED' as Status },
+      }),
       ...(search && {
         title: { contains: search, mode: 'insensitive' as Prisma.QueryMode },
       }),
     },
-    orderBy: { createdAt: sortBy },
-    select: { id: true, title: true, status: true, priority: true },
+    orderBy: sortBy,
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      priority: true,
+      assignee: {
+        select: {
+          name: true,
+        },
+      },
+      dueDate: true,
+    },
   };
   const tasks = await prisma.task.findMany(query);
 

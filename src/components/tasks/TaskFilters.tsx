@@ -2,7 +2,7 @@
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import { Priority, Status } from '@prisma/client';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   Select,
@@ -13,13 +13,16 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { SortByParam } from '@/constants';
 
 type Props = {
   search: string;
   status?: Status | null;
   priority: Priority | null;
-  sortBy: 'asc' | 'desc';
+  sortBy: SortByParam;
   skipStatus?: boolean;
+  myTasks?: boolean;
+  overdue?: boolean;
 };
 
 export default function TaskFilters({
@@ -28,6 +31,8 @@ export default function TaskFilters({
   priority,
   sortBy,
   skipStatus = false,
+  myTasks = false,
+  overdue = false,
 }: Props) {
   const [searchValue, setSearchValue] = useState(search);
   const router = useRouter();
@@ -51,9 +56,20 @@ export default function TaskFilters({
     [updateParam]
   );
 
+  useEffect(() => {
+    return () => debounced.cancel();
+  }, [debounced]);
+
+  const isDefaultSort = sortBy === 'createdAt_desc';
+
   const hasFilters = skipStatus
-    ? !!search || !!priority || sortBy !== 'desc'
-    : !!search || !!status || !!priority || sortBy !== 'desc';
+    ? !!search || !!priority || !isDefaultSort || myTasks || overdue
+    : !!search ||
+      !!status ||
+      !!priority ||
+      !isDefaultSort ||
+      myTasks ||
+      overdue;
 
   const clearFilters = () => {
     router.push('?');
@@ -61,25 +77,67 @@ export default function TaskFilters({
   };
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-      <Input
-        value={searchValue}
-        onChange={(e) => {
-          debounced(e.target.value);
-          setSearchValue(e.target.value);
-        }}
-        placeholder="Search tasks..."
-        className="h-8 w-full sm:w-48"
-      />
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <Button
+          variant={myTasks ? 'default' : 'outline'}
+          size="sm"
+          className="h-8"
+          onClick={() => updateParam('myTasks', myTasks ? null : 'true')}
+        >
+          My Tasks
+        </Button>
+        <Button
+          variant={overdue ? 'default' : 'outline'}
+          size="sm"
+          className="h-8"
+          onClick={() => updateParam('overdue', overdue ? null : 'true')}
+        >
+          Overdue
+        </Button>
+      </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:contents">
-        {!skipStatus && (
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <Input
+          value={searchValue}
+          onChange={(e) => {
+            debounced(e.target.value);
+            setSearchValue(e.target.value);
+          }}
+          placeholder="Search tasks..."
+          className="h-8 w-full sm:w-48"
+        />
+
+        <div className="grid grid-cols-2 gap-2 sm:contents">
+          {!skipStatus && (
+            <Select
+              value={status ?? ''}
+              onValueChange={(val) => updateParam('status', val || null)}
+            >
+              <SelectTrigger className="w-full sm:w-36">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent
+                position="popper"
+                side="bottom"
+                align="start"
+                sideOffset={4}
+              >
+                {TASK_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
           <Select
-            value={status ?? ''}
-            onValueChange={(val) => updateParam('status', val || null)}
+            value={priority ?? ''}
+            onValueChange={(val) => updateParam('priority', val || null)}
           >
             <SelectTrigger className="w-full sm:w-36">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent
               position="popper"
@@ -87,66 +145,47 @@ export default function TaskFilters({
               align="start"
               sideOffset={4}
             >
-              {TASK_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
+              {TASK_PRIORITIES.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        )}
+        </div>
 
-        <Select
-          value={priority ?? ''}
-          onValueChange={(val) => updateParam('priority', val || null)}
-        >
-          <SelectTrigger className="w-full sm:w-36">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent
-            position="popper"
-            side="bottom"
-            align="start"
-            sideOffset={4}
+        <div className="grid grid-cols-2 gap-2 sm:contents">
+          <Select
+            value={sortBy}
+            onValueChange={(val) => updateParam('sortBy', val)}
           >
-            {TASK_PRIORITIES.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent
+              position="popper"
+              side="bottom"
+              align="start"
+              sideOffset={4}
+            >
+              <SelectItem value="createdAt_desc">Newest first</SelectItem>
+              <SelectItem value="createdAt_asc">Oldest first</SelectItem>
+              <SelectItem value="dueDate_asc">Due date: earliest</SelectItem>
+              <SelectItem value="dueDate_desc">Due date: latest</SelectItem>
+            </SelectContent>
+          </Select>
 
-      <div className="grid grid-cols-2 gap-2 sm:contents">
-        <Select
-          value={sortBy}
-          onValueChange={(val) => updateParam('sortBy', val)}
-        >
-          <SelectTrigger className="w-full sm:w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent
-            position="popper"
-            side="bottom"
-            align="start"
-            sideOffset={4}
-          >
-            <SelectItem value="desc">Newest first</SelectItem>
-            <SelectItem value="asc">Oldest first</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {hasFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="w-full sm:w-auto"
-          >
-            Clear filters
-          </Button>
-        )}
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="w-full sm:w-auto"
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

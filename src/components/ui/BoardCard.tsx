@@ -1,10 +1,14 @@
 'use client';
 
+import { DueDateBadge } from '@/components/ui/DueDataBadge';
 import { useDraggable } from '@dnd-kit/core';
 import { Status, Task } from '@prisma/client';
 import Link from 'next/link';
 
-type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'>;
+type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'> & {
+  assignee: { name: string } | null;
+  dueDate: Date | null;
+};
 
 type Props = {
   task: BoardTask;
@@ -61,6 +65,17 @@ export default function BoardCard({
             <p className="truncate text-sm font-medium text-blue-700 underline underline-offset-2">
               {task.title}
             </p>
+            <div className="mt-0.5 flex items-center gap-1.5">
+              <p className="truncate text-xs text-muted-foreground">
+                {task.assignee?.name ?? 'Unassigned'}
+              </p>
+              {task.dueDate && (
+                <>
+                  <span className="text-xs text-muted-foreground">·</span>
+                  <DueDateBadge dueDate={task.dueDate} />
+                </>
+              )}
+            </div>
           </Link>
 
           <span

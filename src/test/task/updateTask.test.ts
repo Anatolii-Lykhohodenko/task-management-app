@@ -85,7 +85,7 @@ describe('updateTask', () => {
     expect(result).toEqual({ error: 'Task not found' });
   });
 
-  it('should correctly update an existent task with assignee', async () => {
+  it('should correctly update an existent task', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(3);
     vi.mocked(assigneeExists).mockResolvedValue(true);
     vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
@@ -96,6 +96,7 @@ describe('updateTask', () => {
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
+    formData.append('dueDate', '2026-06-01');
     formData.append('assigneeId', '5');
     formData.append('description', 'Updated description');
     await updateTask(null, formData);
@@ -117,6 +118,48 @@ describe('updateTask', () => {
         status: 'OPEN',
         priority: 'MEDIUM',
         description: 'Updated description',
+        dueDate: new Date('2026-06-01'),
+      },
+    });
+
+    expect(revalidatePath).toHaveBeenCalledWith('/projects/2/tasks/1');
+    expect(redirect).toHaveBeenCalledWith('/projects/2/tasks/1');
+  });
+
+  it('should correctly update an existent task without dueDate', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(3);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
+    vi.mocked(findTaskInProject).mockResolvedValue({ id: 1 } as never);
+
+    const formData = new FormData();
+    formData.append('taskId', '1');
+    formData.append('projectId', '2');
+    formData.append('title', 'Updated task');
+    formData.append('status', 'OPEN');
+    formData.append('priority', 'MEDIUM');
+    formData.append('dueDate', '');
+    formData.append('assigneeId', '5');
+    formData.append('description', 'Updated description');
+    await updateTask(null, formData);
+
+    expect(findTaskInProject).toHaveBeenCalledWith({
+      taskId: 1,
+      projectId: 2,
+      ownerId: 3,
+      select: { id: true },
+    });
+
+    expect(prisma.task.update).toHaveBeenCalledWith({
+      where: {
+        id: 1,
+      },
+      data: {
+        assigneeId: 5,
+        title: 'Updated task',
+        status: 'OPEN',
+        priority: 'MEDIUM',
+        description: 'Updated description',
+        dueDate: null,
       },
     });
 
@@ -134,11 +177,17 @@ describe('updateTask', () => {
     formData.append('title', 'Updated task');
     formData.append('status', 'OPEN');
     formData.append('priority', 'MEDIUM');
+    formData.append('dueDate', '2026-06-01');
     formData.append('assigneeId', '');
     formData.append('description', 'Updated description');
     await updateTask(null, formData);
 
-    expect(findTaskInProject).toHaveBeenCalledWith({ taskId: 1, projectId: 2, ownerId: 3, select: { id: true }});
+    expect(findTaskInProject).toHaveBeenCalledWith({
+      taskId: 1,
+      projectId: 2,
+      ownerId: 3,
+      select: { id: true },
+    });
 
     expect(prisma.task.update).toHaveBeenCalledWith({
       where: {
@@ -150,6 +199,7 @@ describe('updateTask', () => {
         status: 'OPEN',
         priority: 'MEDIUM',
         description: 'Updated description',
+        dueDate: new Date('2026-06-01'),
       },
     });
 

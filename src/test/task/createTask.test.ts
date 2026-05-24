@@ -101,7 +101,7 @@ describe('createTask', () => {
     expect(redirect).not.toHaveBeenCalled();
   });
 
-  it('should correctly create a task with assignee', async () => {
+  it('should correctly create a task', async () => {
     vi.mocked(getCurrentUserId).mockResolvedValue(1);
     vi.mocked(assigneeExists).mockResolvedValue(true);
     vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
@@ -110,6 +110,7 @@ describe('createTask', () => {
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('assigneeId', '5');
+    formData.append('dueDate', '2026-06-01');
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Created description');
 
@@ -121,6 +122,36 @@ describe('createTask', () => {
         title: 'Created task',
         status: 'OPEN',
         priority: 'MEDIUM',
+        dueDate: new Date('2026-06-01'),
+        description: 'Created description',
+      },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith('/projects/1/tasks');
+    expect(redirect).toHaveBeenCalledWith('/projects/1/tasks');
+  });
+
+  it('should correctly create a task without dueDate', async () => {
+    vi.mocked(getCurrentUserId).mockResolvedValue(1);
+    vi.mocked(assigneeExists).mockResolvedValue(true);
+    vi.mocked(prisma.project.findFirst).mockResolvedValue({ id: 1 } as never);
+    const formData = new FormData();
+    formData.append('projectId', '1');
+    formData.append('title', 'Created task');
+    formData.append('status', 'OPEN');
+    formData.append('assigneeId', '5');
+    formData.append('dueDate', '');
+    formData.append('priority', 'MEDIUM');
+    formData.append('description', 'Created description');
+
+    await createTask(null, formData);
+    expect(prisma.task.create).toHaveBeenCalledWith({
+      data: {
+        assigneeId: 5,
+        projectId: 1,
+        title: 'Created task',
+        status: 'OPEN',
+        priority: 'MEDIUM',
+        dueDate: null,
         description: 'Created description',
       },
     });
@@ -136,6 +167,7 @@ describe('createTask', () => {
     formData.append('title', 'Created task');
     formData.append('status', 'OPEN');
     formData.append('assigneeId', '');
+    formData.append('dueDate', '2026-06-01');
     formData.append('priority', 'MEDIUM');
     formData.append('description', 'Created description');
 
@@ -147,6 +179,7 @@ describe('createTask', () => {
         title: 'Created task',
         status: 'OPEN',
         priority: 'MEDIUM',
+        dueDate: new Date('2026-06-01'),
         description: 'Created description',
       },
     });

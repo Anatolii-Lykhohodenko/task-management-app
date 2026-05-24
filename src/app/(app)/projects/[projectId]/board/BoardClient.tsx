@@ -17,7 +17,10 @@ import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 import BoardColumn from '../../../../../components/ui/BoardColumn';
 import BoardCard from '@/components/ui/BoardCard';
 
-type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'>;
+type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'> & {
+  assignee: { name: string } | null;
+  dueDate: Date | null
+};
 
 type Props = {
   projectId: number;

@@ -13,6 +13,7 @@ function parseAssigneeId(value: string) {
   const parsed = Number(value);
   return parsed > 0 ? parsed : null;
 }
+
 export async function createTask(_prevState: ActionState, formData: FormData) {
   const ownerId = await getCurrentUserId();
 
@@ -27,6 +28,7 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
     priority: formData.get('priority'),
     description: formData.get('description'),
     assigneeId: formData.get('assigneeId'),
+    dueDate: formData.get('dueDate'),
   });
 
   if (!result.success) {
@@ -48,7 +50,8 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
 
   if (!project) return { error: 'Project not found' };
 
-  const { title, status, priority, description, assigneeId } = result.data;
+  const { title, status, priority, description, assigneeId, dueDate } =
+    result.data;
 
 const preparedAssigneeId = parseAssigneeId(assigneeId);
 
@@ -64,6 +67,7 @@ if (preparedAssigneeId) {
         description,
         projectId: project.id,
         assigneeId: preparedAssigneeId,
+        dueDate: dueDate ?? null,
         status,
         priority,
       },
@@ -93,13 +97,14 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
     priority: formData.get('priority'),
     description: formData.get('description'),
     assigneeId: formData.get('assigneeId'),
+    dueDate: formData.get('dueDate'),
   });
 
   if (!result.success) {
     return { error: result.error.issues[0]?.message ?? 'Invalid form data' };
   }
 
-  const { title, status, priority, description, assigneeId } = result.data;
+  const { title, status, priority, description, assigneeId, dueDate } = result.data;
 
 const preparedAssigneeId = parseAssigneeId(assigneeId);
 
@@ -131,6 +136,7 @@ if (preparedAssigneeId) {
       data: {
         title,
         description,
+        dueDate: dueDate ?? null,
         assigneeId: preparedAssigneeId,
         status,
         priority,

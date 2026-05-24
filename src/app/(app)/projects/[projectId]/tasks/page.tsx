@@ -17,6 +17,8 @@ import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import TaskCard from '@/components/ui/TaskCard';
 import ViewToggle from '@/components/ui/ViewToggle';
+import { parseSortBy } from '@/helpers';
+import { SortByParam } from '@/constants';
 
 type Props = {
   params: Promise<{
@@ -26,7 +28,9 @@ type Props = {
     search?: string;
     status?: string;
     priority?: string;
-    sortBy?: 'asc' | 'desc';
+    sortBy?: SortByParam;
+    myTasks?: string;
+    overdue?: string;
   }>;
 };
 
@@ -53,7 +57,8 @@ export default async function TasksPage({ params, searchParams }: Props) {
   if (!ownerId) return null;
 
   const { projectId } = await params;
-  const { search, status, priority, sortBy } = await searchParams;
+  const { search, status, priority, sortBy, myTasks, overdue } =
+    await searchParams;
   const validStatus = TASK_STATUSES.includes(status as Status)
     ? (status as Status)
     : null;
@@ -61,9 +66,7 @@ export default async function TasksPage({ params, searchParams }: Props) {
     ? (priority as Priority)
     : null;
   const numericProjectId = Number(projectId);
-  const validSortBy = ['asc', 'desc'].includes(sortBy as 'asc' | 'desc')
-    ? (sortBy as 'asc' | 'desc')
-    : 'desc';
+  const validSortBy = parseSortBy(sortBy);
 
   if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
     notFound();
@@ -86,16 +89,24 @@ export default async function TasksPage({ params, searchParams }: Props) {
       status: validStatus,
       priority: validPriority,
       sortBy: validSortBy,
+      assigneeId: myTasks === 'true' ? ownerId : undefined,
+      overdue: overdue === 'true',
     }),
     getAssignees({
-      projectId: numericProjectId
-    })
+      projectId: numericProjectId,
+    }),
   ]);
 
   if (!project) notFound();
 
   const tasks = 'error' in rawTasks ? [] : rawTasks;
-  const hasFilters = !!search || !!validStatus || !!validPriority;
+  const hasFilters =
+    !!search ||
+    !!validStatus ||
+    !!validPriority ||
+    myTasks === 'true' ||
+    overdue === 'true' ||
+    (sortBy ?? 'createdAt_desc') !== 'createdAt_desc';
 
   return (
     <div className="space-y-6">
@@ -123,7 +134,9 @@ export default async function TasksPage({ params, searchParams }: Props) {
         search={search ?? ''}
         status={validStatus}
         priority={validPriority}
-        sortBy={validSortBy}
+        myTasks={myTasks === 'true'}
+        overdue={overdue === 'true'}
+        sortBy={sortBy ?? 'createdAt_desc'}
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">

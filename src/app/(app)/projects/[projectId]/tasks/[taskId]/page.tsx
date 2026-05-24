@@ -49,6 +49,7 @@ export default async function TaskPage({ params }: Props) {
       status: true,
       priority: true,
       description: true,
+      dueDate: true,
       assignee: {
         select: {
           name: true
@@ -202,7 +203,38 @@ export default async function TaskPage({ params }: Props) {
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Assignee
                 </p>
-                <p className="mt-1 font-medium">{task.assignee?.name ?? 'Unassigned'}</p>
+                <p className="mt-1 font-medium">
+                  {task.assignee?.name ?? 'Unassigned'}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Due date
+                </p>
+                {task.dueDate ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="font-medium">
+                      {new Date(task.dueDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    {new Date(task.dueDate) < new Date() ? (
+                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                        Overdue
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                        Estimated
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="mt-1 font-medium text-muted-foreground">
+                    Not set
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">

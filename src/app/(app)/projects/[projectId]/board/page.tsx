@@ -8,6 +8,8 @@ import BoardClient from '@/app/(app)/projects/[projectId]/board/BoardClient';
 import Link from 'next/link';
 import ViewToggle from '@/components/ui/ViewToggle';
 import TaskFilters from '@/components/tasks/TaskFilters';
+import { SortByParam } from '@/constants';
+import { parseSortBy } from '@/helpers';
 
 type Props = {
   params: Promise<{
@@ -15,9 +17,8 @@ type Props = {
   }>;
   searchParams: Promise<{
     search?: string;
-    status?: string;
     priority?: string;
-    sortBy?: 'asc' | 'desc';
+    sortBy?: SortByParam;
   }>;
 };
 
@@ -49,9 +50,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
     ? (priority as Priority)
     : null;
   const numericProjectId = Number(projectId);
-  const validSortBy = ['asc', 'desc'].includes(sortBy as 'asc' | 'desc')
-    ? (sortBy as 'asc' | 'desc')
-    : 'desc';
+  const validSortBy = parseSortBy(sortBy);
 
   if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
     notFound();
@@ -80,7 +79,10 @@ export default async function BoardPage({ params, searchParams }: Props) {
 
   const tasks = 'error' in rawTasks ? [] : rawTasks;
 
-    const hasFilters = !!search || !!validPriority;
+  const hasFilters =
+    !!search ||
+    !!validPriority ||
+    (sortBy ?? 'createdAt_desc') !== 'createdAt_desc';
 
   return (
     <div className="space-y-6">
@@ -105,7 +107,7 @@ export default async function BoardPage({ params, searchParams }: Props) {
       <TaskFilters
         search={search ?? ''}
         priority={validPriority}
-        sortBy={validSortBy}
+        sortBy={sortBy ?? 'createdAt_desc'}
         skipStatus={true}
       />
       {tasks.length === 0 ? (

@@ -14,3 +14,11 @@ export type Action = (
   _prevState: ActionState | null,
   formData: FormData
 ) => Promise<ActionState>;
+
+export type SortByType =
+  | {
+      createdAt: 'asc';
+    }
+  | { createdAt: 'desc' }
+  | { dueDate: 'asc' }
+  | { dueDate: 'desc' };

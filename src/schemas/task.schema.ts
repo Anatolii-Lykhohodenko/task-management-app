@@ -17,6 +17,11 @@ export const taskSchema = z.object({
     .refine((value) => value === '' || /^\d+$/.test(value), {
       error: 'Invalid assignee',
     }),
+  dueDate: z.preprocess((value) => {
+    if (!value || value === '') return undefined;
+    const date = new Date(value as string);
+    return isNaN(date.getTime()) ? undefined : date;
+  }, z.date().optional()),
 });
 
 

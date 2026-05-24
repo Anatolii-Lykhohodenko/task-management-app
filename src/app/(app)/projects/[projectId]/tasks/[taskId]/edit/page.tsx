@@ -45,6 +45,7 @@ export default async function EditTaskPage({ params }: Props) {
         status: true,
         priority: true,
         description: true,
+        dueDate: true,
         assignee: {
           select: {
             id: true,

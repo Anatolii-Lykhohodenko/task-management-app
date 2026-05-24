@@ -28,12 +28,21 @@ type Props = {
     status: Status;
     priority: Priority;
     description?: string | null;
+    dueDate?: Date | null;
     assignee: {
       id: number;
       name: string;
     } | null;
   };
 };
+
+function RequiredMark() {
+  return (
+    <span className="ml-0.5 text-destructive" aria-hidden="true">
+      *
+    </span>
+  );
+}
 
 export function TaskForm({
   serverAction,
@@ -54,11 +63,18 @@ export function TaskForm({
       ? String(defaultValues.assignee.id)
       : 'unassigned'
   );
+  const [dueDate, setDueDate] = useState<string>(
+    defaultValues?.dueDate
+      ? new Date(defaultValues.dueDate).toISOString().split('T')[0]
+      : ''
+  );
 
   return (
     <form action={action} className="space-y-5">
       <div className="space-y-1.5">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title">
+          Title <RequiredMark />
+        </Label>
         <Input
           id="title"
           name="title"
@@ -70,7 +86,9 @@ export function TaskForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status">
+            Status <RequiredMark />
+          </Label>
           <Select onValueChange={setStatus} defaultValue={status}>
             <SelectTrigger id="status" className="w-full">
               <SelectValue />
@@ -90,9 +108,10 @@ export function TaskForm({
           </Select>
           <input type="hidden" name="status" value={status} />
         </div>
-
         <div className="space-y-1.5">
-          <Label htmlFor="priority">Priority</Label>
+          <Label htmlFor="priority">
+            Priority <RequiredMark />
+          </Label>
           <Select onValueChange={setPriority} defaultValue={priority}>
             <SelectTrigger id="priority" className="w-full">
               <SelectValue />
@@ -142,6 +161,18 @@ export function TaskForm({
       </div>
 
       <div className="space-y-1.5">
+        <Label htmlFor="dueDate">Due date</Label>
+        <Input
+          id="dueDate"
+          name="dueDate"
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
@@ -155,7 +186,10 @@ export function TaskForm({
       <input type="hidden" name="projectId" value={projectId} />
       {taskId && <input type="hidden" name="taskId" value={taskId} />}
 
-      <div className="flex items-center gap-3">
+      <div className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          <span className="text-destructive">*</span> Required fields
+        </p>
         <Button type="submit" disabled={isPending}>
           {isPending
             ? 'Saving...'
