@@ -234,17 +234,18 @@ export async function getAssignees({ projectId }: { projectId: number }) {
   return assignees;
 }
 
-export async function assigneeExists(assigneeId: number) {
+export async function findAssignee(assigneeId: number) {
   const assignee = await prisma.user.findUnique({
     where: {
       id: assigneeId,
     },
     select: {
       id: true,
+      name: true
     },
   });
 
-  return !!assignee;
+  return assignee;
 }
 
 export async function getActivityLogs({ taskId }: { taskId: number }) {
@@ -269,8 +270,9 @@ export async function getActivityLogs({ taskId }: { taskId: number }) {
         }
       }
     },
-    orderBy: { 'createdAt': 'asc' }
+    take: 10,
+    orderBy: { 'createdAt': 'desc' }
   });
 
-  return logs;
+  return logs.reverse();
 }

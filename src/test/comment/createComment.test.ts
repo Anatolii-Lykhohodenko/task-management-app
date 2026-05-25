@@ -10,6 +10,9 @@ vi.mock('@/lib/db/client', () => ({
   default: {
     comment: {
       create: vi.fn(),
+    },
+    activityLog: {
+      create: vi.fn()
     }
   },
 }));
@@ -96,6 +99,14 @@ describe('createComment', () => {
         parentId: 3,
       },
     });
+    expect(prisma.activityLog.create).toHaveBeenCalledWith({
+      data: {
+        taskId: 1,
+        userId: 1,
+        activityType: 'COMMENT_ADDED',
+      },
+    });
+
     expect(revalidatePath).toHaveBeenCalledWith('/projects/2/tasks/1');
     expect(redirect).toHaveBeenCalledWith('/projects/2/tasks/1');
   });

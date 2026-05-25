@@ -1,7 +1,10 @@
 'use server';
 
 import prisma from '@/lib/db/client';
-import { assigneeExists, findTaskInProject } from '@/lib/db/queries';
+import {
+  findAssignee,
+  findTaskInProject,
+} from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { taskSchema } from '@/schemas/task.schema';
 import { ActionState } from '@/types';
@@ -56,8 +59,8 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
   const preparedAssigneeId = parseAssigneeId(assigneeId);
 
   if (preparedAssigneeId) {
-    const isAssigneeExist = await assigneeExists(preparedAssigneeId);
-    if (!isAssigneeExist) return { error: 'Assignee not found' };
+    const newAssignee = await findAssignee(preparedAssigneeId);
+    if (!newAssignee) return { error: 'Assignee not found' };
   }
 
   try {
@@ -118,10 +121,11 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
     result.data;
 
   const preparedAssigneeId = parseAssigneeId(assigneeId);
+  let newAssignee
 
   if (preparedAssigneeId) {
-    const isAssigneeExist = await assigneeExists(preparedAssigneeId);
-    if (!isAssigneeExist) return { error: 'Assignee not found' };
+    newAssignee = await findAssignee(preparedAssigneeId);
+    if (!newAssignee) return { error: 'Assignee not found' };
   }
 
   if (!projectId || Number.isNaN(projectId))
@@ -135,7 +139,12 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
     select: {
       id: true,
       status: true,
-      assigneeId: true,
+      assignee: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
       priority: true,
       dueDate: true,
     },
@@ -166,8 +175,7 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
         break;
       }
       case 'status':
-      case 'priority':
-      case 'assigneeId': {
+      case 'priority': {
         if (task[property] !== newValues[property]) {
           const action =
             property === 'status'
@@ -178,6 +186,17 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
           changes.push({
             action,
             payload: { from: task[property], to: newValues[property] },
+          });
+        }
+        break;
+      }
+
+      case 'assigneeId': {
+        if (task.assignee?.id !== newAssignee?.id) {
+          const action = ActivityType.ASSIGNEE_CHANGED;
+          changes.push({
+            action,
+            payload: { from: task.assignee?.name, to: newAssignee?.name },
           });
         }
         break;
@@ -306,7 +325,7 @@ export async function updateTaskPartially({
     priority,
   };
   const changes = [];
-  
+
   const trackedKeys = ['status', 'priority'] as const;
 
   for (const property of trackedKeys) {

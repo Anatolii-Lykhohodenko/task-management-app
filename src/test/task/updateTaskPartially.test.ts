@@ -10,6 +10,9 @@ vi.mock('@/lib/db/client', () => ({
     task: {
       update: vi.fn(),
     },
+    activityLog: {
+      create: vi.fn()
+    }
   },
 }));
 vi.mock('@/lib/db/queries', () => ({

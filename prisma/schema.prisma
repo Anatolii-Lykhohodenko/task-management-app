@@ -55,7 +55,7 @@ model Project {
 model Task {
   id          Int       @id @default(autoincrement())
   title       String
-  description String?
+  description Json?
   status      Status    @default(OPEN)
   priority    Priority  @default(MEDIUM)
   createdAt   DateTime  @default(now())

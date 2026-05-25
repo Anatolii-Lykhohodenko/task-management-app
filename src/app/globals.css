@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -131,4 +131,24 @@
 
 [data-radix-select-content] {
   animation-duration: 150ms;
+}
+
+.tiptap h2 {
+  @apply text-lg font-semibold mt-2 mb-1;
+}
+
+.tiptap ul {
+  @apply list-disc pl-5 space-y-1;
+}
+
+.tiptap ol {
+  @apply list-decimal pl-5 space-y-1;
+}
+
+.tiptap code {
+  @apply rounded bg-muted px-1 py-0.5 text-sm font-mono;
+}
+
+.tiptap p {
+  @apply leading-6;
 }

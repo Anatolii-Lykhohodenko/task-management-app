@@ -27,7 +27,11 @@ function formatPayload(type: ActivityType, payload: unknown): string {
     case 'PRIORITY_CHANGED':
       return `Priority changed: ${p?.from ?? '—'} → ${p?.to ?? '—'}`;
     case 'ASSIGNEE_CHANGED':
-      return p?.to ? `Assigned to ${p.to}` : 'Assignee removed';
+      return p?.to
+        ? p?.from
+          ? `Assigned from ${p.from} to ${p.to}`
+          : `Assigned to ${p.to}`
+        : 'Assignee removed';
     case 'DUE_DATE_CHANGED':
       return p?.to ? `Due date set: ${p.to}` : 'Due date removed';
     case 'TASK_CREATED':
@@ -58,7 +62,7 @@ export default function ActivityLog({ logs }: Props) {
         <CardDescription>
           {logs.length === 0
             ? 'No activity yet'
-            : `${logs.length} event${logs.length === 1 ? '' : 's'}`}
+            : `last ${logs.length} event${logs.length === 1 ? '' : 's'}`}
         </CardDescription>
       </CardHeader>
       <CardContent>

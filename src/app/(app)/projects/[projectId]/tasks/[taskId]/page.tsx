@@ -17,6 +17,7 @@ import { createComment, deleteComment } from '@/server/actions/comments';
 import CommentItem from '@/components/comment/CommentItem';
 import { TaskProperties } from '@/components/ui/TaskPropeties';
 import ActivityLog from '@/components/ui/ActivityLog';
+import RichTextContent from '@/components/ui/RichTextContent';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -119,15 +120,9 @@ export default async function TaskPage({ params }: Props) {
               <CardDescription>Main details for this task</CardDescription>
             </CardHeader>
             <CardContent>
-              {task.description ? (
-                <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
-                  {task.description}
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No description provided.
-                </p>
-              )}
+              <RichTextContent
+                content={task.description as Record<string, unknown> | null}
+              />
             </CardContent>
           </Card>
 

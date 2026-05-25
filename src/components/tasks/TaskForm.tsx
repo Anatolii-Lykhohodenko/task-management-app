@@ -12,7 +12,7 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import { Button } from '@/components/ui/button';
 
 const statuses = Object.values(Status);
@@ -27,7 +27,7 @@ type Props = {
     title: string;
     status: Status;
     priority: Priority;
-    description?: string | null;
+    description?: Record<string, unknown> | null;
     dueDate?: Date | null;
     assignee: {
       id: number;
@@ -173,13 +173,10 @@ export function TaskForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
+        <Label>Description</Label>
+        <RichTextEditor
           name="description"
-          defaultValue={defaultValues?.description ?? ''}
-          placeholder="Add more context for this task"
-          className="min-h-32"
+          defaultValue={defaultValues?.description ?? null}
         />
       </div>
 
