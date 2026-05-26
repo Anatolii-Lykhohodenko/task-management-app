@@ -1,14 +1,11 @@
 'use server';
 
 import prisma from '@/lib/db/client';
-import {
-  findAssignee,
-  findTaskInProject,
-} from '@/lib/db/queries';
+import { findAssignee, findTaskInProject } from '@/lib/db/queries';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { taskSchema } from '@/schemas/task.schema';
 import { ActionState } from '@/types';
-import { Status, Priority, ActivityType } from '@prisma/client';
+import { Status, Priority, ActivityType, Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -67,7 +64,7 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
     const task = await prisma.task.create({
       data: {
         title,
-        description,
+        description: (description as Prisma.InputJsonValue) ?? Prisma.JsonNull,
         projectId: project.id,
         assigneeId: preparedAssigneeId,
         dueDate: dueDate ?? null,
@@ -91,7 +88,7 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
   }
 
   revalidatePath(`/projects/${project.id}/tasks`);
-  redirect(`/projects/${project.id}/tasks`);
+  redirect(`/projects/${project.id}/tasks?toast=created`);
 }
 
 export async function updateTask(_prevState: ActionState, formData: FormData) {
@@ -121,7 +118,7 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
     result.data;
 
   const preparedAssigneeId = parseAssigneeId(assigneeId);
-  let newAssignee
+  let newAssignee;
 
   if (preparedAssigneeId) {
     newAssignee = await findAssignee(preparedAssigneeId);
@@ -226,7 +223,7 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
         },
         data: {
           title,
-          description,
+          description: (description as Prisma.InputJsonValue) ?? Prisma.JsonNull,
           dueDate: dueDate ?? null,
           assigneeId: preparedAssigneeId,
           status,
@@ -241,7 +238,7 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   }
 
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
-  redirect(`/projects/${projectId}/tasks/${taskId}`);
+  redirect(`/projects/${projectId}/tasks/${taskId}?toast=updated`);
 }
 
 export async function deleteTask({
@@ -285,7 +282,7 @@ export async function deleteTask({
   });
 
   revalidatePath(`/projects/${projectId}/tasks`);
-  redirect(`/projects/${projectId}/tasks`, 'replace');
+  redirect(`/projects/${projectId}/tasks?toast=deleted`, 'replace');
 }
 
 export async function updateTaskPartially({

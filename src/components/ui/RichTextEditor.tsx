@@ -54,7 +54,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('bold')}
-          onPressedChange={() => editor?.chain().focus().toggleBold().run()}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleBold().run();
+          }}
           aria-label="Bold"
         >
           <Bold className="h-3.5 w-3.5" />
@@ -62,7 +65,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('italic')}
-          onPressedChange={() => editor?.chain().focus().toggleItalic().run()}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleItalic().run();
+          }}
           aria-label="Italic"
         >
           <Italic className="h-3.5 w-3.5" />
@@ -70,7 +76,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('strike')}
-          onPressedChange={() => editor?.chain().focus().toggleStrike().run()}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleStrike().run();
+          }}
           aria-label="Strikethrough"
         >
           <Strikethrough className="h-3.5 w-3.5" />
@@ -81,9 +90,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('heading', { level: 2 })}
-          onPressedChange={() =>
-            editor?.chain().focus().toggleHeading({ level: 2 }).run()
-          }
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleHeading({ level: 2 }).run();
+          }}
           aria-label="Heading"
         >
           <Heading2 className="h-3.5 w-3.5" />
@@ -94,9 +104,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('bulletList')}
-          onPressedChange={() =>
-            editor?.chain().focus().toggleBulletList().run()
-          }
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleBulletList().run();
+          }}
           aria-label="Bullet list"
         >
           <List className="h-3.5 w-3.5" />
@@ -104,9 +115,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('orderedList')}
-          onPressedChange={() =>
-            editor?.chain().focus().toggleOrderedList().run()
-          }
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleOrderedList().run();
+          }}
           aria-label="Ordered list"
         >
           <ListOrdered className="h-3.5 w-3.5" />
@@ -117,7 +129,10 @@ export default function RichTextEditor({ name, defaultValue }: Props) {
         <Toggle
           size="sm"
           pressed={editor?.isActive('code')}
-          onPressedChange={() => editor?.chain().focus().toggleCode().run()}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor?.chain().focus().toggleCode().run();
+          }}
           aria-label="Inline code"
         >
           <Code className="h-3.5 w-3.5" />

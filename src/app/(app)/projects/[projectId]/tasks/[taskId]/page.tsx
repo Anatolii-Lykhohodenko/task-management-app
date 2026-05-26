@@ -18,14 +18,16 @@ import CommentItem from '@/components/comment/CommentItem';
 import { TaskProperties } from '@/components/ui/TaskPropeties';
 import ActivityLog from '@/components/ui/ActivityLog';
 import RichTextContent from '@/components/ui/RichTextContent';
+import { ToastHandler } from '@/components/ui/ToastHandler';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
+  searchParams: Promise<{ toast?: string }>;
 };
 
-export default async function TaskPage({ params }: Props) {
+export default async function TaskPage({ params, searchParams }: Props) {
   const { projectId, taskId } = await params;
-
+  const { toast } = await searchParams;
   const numericProjectId = Number(projectId);
   const numericTaskId = Number(taskId);
 
@@ -54,8 +56,8 @@ export default async function TaskPage({ params }: Props) {
       dueDate: true,
       assignee: {
         select: {
-          name: true
-        }
+          name: true,
+        },
       },
       createdAt: true,
       comments: {
@@ -91,6 +93,7 @@ export default async function TaskPage({ params }: Props) {
 
   return (
     <div className="space-y-6">
+      <ToastHandler message={toast} />
       <div>
         <Link
           href={`/projects/${projectId}/tasks`}

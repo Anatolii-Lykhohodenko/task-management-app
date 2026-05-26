@@ -19,6 +19,7 @@ import TaskCard from '@/components/ui/TaskCard';
 import ViewToggle from '@/components/ui/ViewToggle';
 import { parseSortBy } from '@/helpers';
 import { SortByParam } from '@/constants';
+import { ToastHandler } from '@/components/ui/ToastHandler';
 
 type Props = {
   params: Promise<{
@@ -31,6 +32,7 @@ type Props = {
     sortBy?: SortByParam;
     myTasks?: string;
     overdue?: string;
+    toast?: string;
   }>;
 };
 
@@ -57,7 +59,7 @@ export default async function TasksPage({ params, searchParams }: Props) {
   if (!ownerId) return null;
 
   const { projectId } = await params;
-  const { search, status, priority, sortBy, myTasks, overdue } =
+  const { search, status, priority, sortBy, myTasks, overdue, toast } =
     await searchParams;
   const validStatus = TASK_STATUSES.includes(status as Status)
     ? (status as Status)
@@ -110,6 +112,7 @@ export default async function TasksPage({ params, searchParams }: Props) {
 
   return (
     <div className="space-y-6">
+      <ToastHandler message={toast} />
       <Link
         href={`/projects/${project.id}`}
         className="text-sm text-muted-foreground transition-colors hover:text-foreground"

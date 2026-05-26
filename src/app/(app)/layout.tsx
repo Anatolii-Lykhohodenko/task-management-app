@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { signOutAction } from '@/server/actions/auth';
 import AppSidebar from '@/components/ui/app-sidebar';
 import Link from 'next/link';
+import { Toaster } from '@/components/ui/sonner';
 
 export default async function AppLayout({
   children,
@@ -49,6 +50,7 @@ export default async function AppLayout({
           <div className="w-full max-w-7xl">{children}</div>
         </main>
       </div>
+      <Toaster closeButton />
     </div>
   );
 }
