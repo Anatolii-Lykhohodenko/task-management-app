@@ -88,7 +88,7 @@ export async function createTask(_prevState: ActionState, formData: FormData) {
   }
 
   revalidatePath(`/projects/${project.id}/tasks`);
-  redirect(`/projects/${project.id}/tasks?toast=created`);
+  redirect(`/projects/${project.id}/tasks?toast=task_created`);
 }
 
 export async function updateTask(_prevState: ActionState, formData: FormData) {
@@ -223,7 +223,8 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
         },
         data: {
           title,
-          description: (description as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+          description:
+            (description as Prisma.InputJsonValue) ?? Prisma.JsonNull,
           dueDate: dueDate ?? null,
           assigneeId: preparedAssigneeId,
           status,
@@ -238,7 +239,7 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   }
 
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
-  redirect(`/projects/${projectId}/tasks/${taskId}?toast=updated`);
+  redirect(`/projects/${projectId}/tasks/${taskId}?toast=task_updated`);
 }
 
 export async function deleteTask({
@@ -275,14 +276,71 @@ export async function deleteTask({
     throw new Error('Task not found');
   }
 
-  await prisma.task.delete({
+  await prisma.task.update({
     where: {
       id: task.id,
+    },
+    data: {
+      deletedAt: new Date(),
     },
   });
 
   revalidatePath(`/projects/${projectId}/tasks`);
-  redirect(`/projects/${projectId}/tasks?toast=deleted`, 'replace');
+  redirect(
+    `/projects/${projectId}/tasks?toast=task_deleted&taskId=${task.id}&projectId=${projectId}`,
+    'replace'
+  );
+}
+
+export async function restoreTask({
+  projectId,
+  taskId,
+}: {
+  projectId: number;
+  taskId: number;
+}) {
+  if (!projectId) {
+    return { success: false, error: 'Project not found' };
+  }
+
+  if (!taskId) {
+    return { success: false, error: 'Task not found' };
+  }
+
+  const ownerId = await getCurrentUserId();
+
+  if (!ownerId) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const task = await findTaskInProject({
+    taskId,
+    projectId,
+    ownerId,
+    select: {
+      id: true,
+    },
+    deletedState: 'deleted',
+  });
+
+  if (!task) {
+    return { success: false, error: 'Task not found' };
+  }
+  try {
+    await prisma.task.update({
+      where: {
+        id: task.id,
+      },
+      data: {
+        deletedAt: null,
+      },
+    });
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err.message : 'Something went wrong';
+    return { success: false, error };
+  }
+  revalidatePath(`/projects/${projectId}/tasks`);
+  return { success: true };
 }
 
 export async function updateTaskPartially({
@@ -299,6 +357,13 @@ export async function updateTaskPartially({
   if (!status && !priority) {
     return;
   }
+
+  const toast =
+    status && priority
+      ? 'task_status_and_priority_updated'
+      : status
+        ? 'task_status_updated'
+        : 'task_priority_updated';
   const userId = await getCurrentUserId();
   if (!userId) {
     return { error: 'Unauthorized' };
@@ -377,7 +442,7 @@ export async function updateTaskPartially({
     const message = err instanceof Error ? err.message : 'Something went wrong';
     return { error: message };
   }
-  revalidatePath(`/projects/${projectId}/tasks`);
+  revalidatePath(`/projects/${projectId}/tasks?toast=${toast}`);
 }
 
 export async function updateTaskStatus({
@@ -429,5 +494,5 @@ export async function updateTaskStatus({
     throw new Error(message);
   }
 
-  revalidatePath(`/projects/${projectId}/board`);
+  revalidatePath(`/projects/${projectId}/board?toast=task_status_updated`);
 }

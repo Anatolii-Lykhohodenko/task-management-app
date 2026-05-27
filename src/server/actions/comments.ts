@@ -68,7 +68,7 @@ export async function createComment(
   }
 
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
-  redirect(`/projects/${projectId}/tasks/${taskId}`);
+  redirect(`/projects/${projectId}/tasks/${taskId}?toast=comment_created`);
 }
 
 export async function updateComment(
@@ -136,7 +136,7 @@ export async function updateComment(
   }
 
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
-  redirect(`/projects/${projectId}/tasks/${taskId}`);
+  redirect(`/projects/${projectId}/tasks/${taskId}?toast=comment_updated`);
 }
 
 export async function deleteComment(
@@ -191,5 +191,8 @@ export async function deleteComment(
   }
 
   revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
-  redirect(`/projects/${projectId}/tasks/${taskId}`, 'replace');
+  redirect(
+    `/projects/${projectId}/tasks/${taskId}?toast=comment_deleted`,
+    'replace'
+  );
 }

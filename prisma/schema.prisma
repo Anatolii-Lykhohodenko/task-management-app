@@ -59,6 +59,7 @@ model Task {
   status      Status    @default(OPEN)
   priority    Priority  @default(MEDIUM)
   createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
   dueDate     DateTime?
 
   project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -98,5 +99,5 @@ model ActivityLog {
   userId Int?
 
   activityType ActivityType
-  payload Json?
+  payload      Json?
 }

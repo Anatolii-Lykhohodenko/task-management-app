@@ -8,11 +8,13 @@ export async function findTaskInProject<T extends Prisma.TaskSelect>({
   projectId,
   ownerId,
   select,
+  deletedState = 'active',
 }: {
   taskId: number;
   projectId: number;
   ownerId: number;
   select: T;
+  deletedState?: 'active' | 'deleted' | 'all';
 }) {
   return prisma.task.findFirst({
     where: {
@@ -21,6 +23,11 @@ export async function findTaskInProject<T extends Prisma.TaskSelect>({
       project: {
         ownerId,
       },
+      ...(deletedState === 'active'
+        ? { deletedAt: null }
+        : deletedState === 'deleted'
+          ? { deletedAt: { not: null } }
+          : {}),
     },
     select,
   });
@@ -67,27 +74,31 @@ export async function getDashBoardStats() {
     return { error: 'Unauthorized' };
   }
 
-  const [projects, tasks] = await Promise.all([
-    prisma.project.findMany({
-      where: {
-        ownerId,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    }),
-    prisma.task.findMany({
-      where: {
-        project: {
-          ownerId,
+  const [projectsCount, tasksCount, byStatus, byPriority, overdue] =
+    await Promise.all([
+      prisma.project.count({ where: { ownerId } }),
+      prisma.task.count({ where: { project: { ownerId }, deletedAt: null } }),
+      prisma.task.groupBy({
+        by: ['status'],
+        where: { project: { ownerId }, deletedAt: null },
+        _count: { status: true },
+      }),
+      prisma.task.groupBy({
+        by: ['priority'],
+        where: { project: { ownerId }, deletedAt: null },
+        _count: { priority: true },
+      }),
+      prisma.task.count({
+        where: {
+          deletedAt: null,
+          project: { ownerId },
+          dueDate: { lt: new Date() },
+          status: { not: 'CLOSED' },
         },
-      },
-      select: { status: true, id: true },
-    }),
-  ]);
+      }),
+    ]);
 
-  return { projects, tasks };
+  return { projectsCount, tasksCount, byStatus, byPriority, overdue };
 }
 
 export async function getRecentTasks() {
@@ -102,6 +113,7 @@ export async function getRecentTasks() {
       project: {
         ownerId,
       },
+      deletedAt: null,
     },
     orderBy: { createdAt: 'desc' },
     take: 10,
@@ -130,6 +142,9 @@ export async function getRecentComments() {
   const recentComments = await prisma.comment.findMany({
     where: {
       userId,
+      task: {
+        deletedAt: null,
+      },
     },
     orderBy: { createdAt: 'desc' },
     take: 5,
@@ -194,6 +209,7 @@ export async function getTasks({
       ...(search && {
         title: { contains: search, mode: 'insensitive' as Prisma.QueryMode },
       }),
+      deletedAt: null,
     },
     orderBy: sortBy,
     select: {
@@ -241,7 +257,7 @@ export async function findAssignee(assigneeId: number) {
     },
     select: {
       id: true,
-      name: true
+      name: true,
     },
   });
 
@@ -266,12 +282,12 @@ export async function getActivityLogs({ taskId }: { taskId: number }) {
       createdAt: true,
       user: {
         select: {
-          name: true
-        }
-      }
+          name: true,
+        },
+      },
     },
     take: 10,
-    orderBy: { 'createdAt': 'desc' }
+    orderBy: { createdAt: 'desc' },
   });
 
   return logs.reverse();
