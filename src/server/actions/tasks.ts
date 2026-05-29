@@ -276,14 +276,28 @@ export async function deleteTask({
     throw new Error('Task not found');
   }
 
-  await prisma.task.update({
-    where: {
-      id: task.id,
-    },
-    data: {
-      deletedAt: new Date(),
-    },
-  });
+  try {
+    await Promise.all([
+      prisma.task.update({
+        where: {
+          id: task.id,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      }),
+      prisma.activityLog.create({
+        data: {
+          taskId: task.id,
+          userId: ownerId,
+          activityType: 'TASK_DELETED',
+        },
+      }),
+    ]);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    throw new Error(message);
+  }
 
   revalidatePath(`/projects/${projectId}/tasks`);
   redirect(
@@ -327,14 +341,23 @@ export async function restoreTask({
     return { success: false, error: 'Task not found' };
   }
   try {
-    await prisma.task.update({
-      where: {
-        id: task.id,
-      },
-      data: {
-        deletedAt: null,
-      },
-    });
+    await Promise.all([
+      prisma.task.update({
+        where: {
+          id: task.id,
+        },
+        data: {
+          deletedAt: null,
+        },
+      }),
+      prisma.activityLog.create({
+        data: {
+          taskId: task.id,
+          userId: ownerId,
+          activityType: 'TASK_RESTORED',
+        },
+      }),
+    ]);
   } catch (err: unknown) {
     const error = err instanceof Error ? err.message : 'Something went wrong';
     return { success: false, error };

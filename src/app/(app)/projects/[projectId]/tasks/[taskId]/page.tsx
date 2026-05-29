@@ -181,7 +181,7 @@ export default async function TaskPage({ params, searchParams }: Props) {
 
               <DialogYesOrNo
                 title="Delete task?"
-                description={`This will permanently delete the task.`}
+                description="The task will be moved to trash. You can restore it after deletion."
                 confirmText="Delete task"
                 cancelText="Cancel"
                 variant="destructive"
@@ -256,7 +256,11 @@ export default async function TaskPage({ params, searchParams }: Props) {
                   Created
                 </p>
                 <p className="mt-1 font-medium">
-                  {task.createdAt.toDateString()}
+                  {task.createdAt.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
                 </p>
               </div>
             </CardContent>

@@ -23,23 +23,27 @@ function formatPayload(type: ActivityType, payload: unknown): string {
   const p = payload as Record<string, string> | null;
   switch (type) {
     case 'STATUS_CHANGED':
-      return `Status changed: ${p?.from ?? '—'} → ${p?.to ?? '—'}`;
+      return `changed status: ${p?.from ?? '—'} → ${p?.to ?? '—'}`;
     case 'PRIORITY_CHANGED':
-      return `Priority changed: ${p?.from ?? '—'} → ${p?.to ?? '—'}`;
+      return `changed priority: ${p?.from ?? '—'} → ${p?.to ?? '—'}`;
     case 'ASSIGNEE_CHANGED':
       return p?.to
         ? p?.from
-          ? `Assigned from ${p.from} to ${p.to}`
-          : `Assigned to ${p.to}`
-        : 'Assignee removed';
+          ? `assigned this task from ${p.from} to ${p.to}`
+          : `assigned this task to ${p.to}`
+        : 'removed assignee';
     case 'DUE_DATE_CHANGED':
-      return p?.to ? `Due date set: ${p.to}` : 'Due date removed';
+      return p?.to ? `set task's due date: ${p.to}` : 'removed due date';
     case 'TASK_CREATED':
-      return 'Task created';
+      return 'created this task';
+    case 'TASK_DELETED':
+      return 'deleted this task';
+    case 'TASK_RESTORED':
+      return 'restored this task';
     case 'COMMENT_ADDED':
-      return 'Left a comment';
+      return 'left a comment';
     default:
-      return 'Unknown action';
+      return 'performed an unknown action';
   }
 }
 
@@ -76,10 +80,13 @@ export default function ActivityLog({ logs }: Props) {
                   <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
                 </span>
                 <p className="text-sm text-foreground">
+                  <span className="font-medium">
+                    {log.user?.name ?? 'Unknown'}
+                  </span>{' '}
                   {formatPayload(log.activityType, log.payload)}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {log.user?.name ?? 'Unknown user'} · {timeAgo(log.createdAt)}
+                  {timeAgo(log.createdAt)}
                 </p>
               </li>
             ))}

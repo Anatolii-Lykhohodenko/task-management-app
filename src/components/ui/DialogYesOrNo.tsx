@@ -9,9 +9,11 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel
+  AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 
 type Props = {
   title: string;
@@ -32,6 +34,21 @@ export function DialogYesOrNo({
   action,
   children,
 }: Props) {
+  const [pending, setPending] = React.useState(false);
+
+  const handleAction = async () => {
+    setPending(true);
+    try {
+      await action();
+    } catch (err: unknown) {
+      if (isRedirectError(err)) throw err;
+      const message =
+        err instanceof Error ? err.message : 'Something went wrong';
+      toast.error(message);
+    } finally {
+      setPending(false);
+    }
+  };
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
@@ -48,11 +65,14 @@ export function DialogYesOrNo({
         <AlertDialogFooter>
           <AlertDialogCancel>{cancelText}</AlertDialogCancel>
 
-          <form action={action}>
-            <Button type="submit" variant={variant}>
-              {confirmText}
-            </Button>
-          </form>
+          <Button
+            type="button"
+            variant={variant}
+            disabled={pending}
+            onClick={handleAction}
+          >
+            {pending ? 'Loading...' : confirmText}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
