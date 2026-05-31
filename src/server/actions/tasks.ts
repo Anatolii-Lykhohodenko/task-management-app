@@ -306,6 +306,57 @@ export async function deleteTask({
   );
 }
 
+export async function hardDeleteTask({
+  projectId,
+  taskId,
+}: {
+  projectId: number;
+  taskId: number;
+}) {
+  if (!projectId) {
+    return { success: false, error: 'Project not found' };
+  }
+
+  if (!taskId) {
+    return { success: false, error: 'Task not found' };
+  }
+
+  const ownerId = await getCurrentUserId();
+
+  if (!ownerId) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  const task = await findTaskInProject({
+    taskId,
+    projectId,
+    ownerId,
+    select: {
+      id: true,
+    },
+    deletedState: 'deleted'
+  });
+
+  if (!task) {
+    return { success: false, error: 'Task not found' };
+  }
+
+  try {
+    await prisma.task.delete({
+      where: {
+        id: task.id,
+      },
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+    return { success: false, error: message };
+  }
+
+  revalidatePath(`/projects/${projectId}/tasks`);
+
+  return { success: true };
+}
+
 export async function restoreTask({
   projectId,
   taskId,

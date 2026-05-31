@@ -26,62 +26,62 @@ export default async function ProjectPage({ params }: Props) {
 
   const numericProjectId = Number(projectId);
 
-  if (
-    !Number.isInteger(numericProjectId) ||
-    numericProjectId <= 0
-  ) {
+  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
     notFound();
   }
 
-  const project = await prisma.project.findUnique({
-    select: {
-      user: {
-        select: {
-          name: true,
+  const [project, deletedCount] = await Promise.all([
+    prisma.project.findUnique({
+      select: {
+        user: { select: { name: true } },
+        tasks: {
+          select: {
+            title: true,
+            id: true,
+            status: true,
+            priority: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
         },
+        _count: { select: { tasks: true } },
+        name: true,
+        createdAt: true,
       },
-      tasks: {
-        select: {
-          title: true,
-          id: true,
-          status: true,
-          priority: true,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        take: 5,
-      },
-      _count: {
-        select: {
-          tasks: true,
-        },
-      },
-      name: true,
-      createdAt: true,
-    },
-    where: { id: numericProjectId, ownerId },
-  });
+      where: { id: numericProjectId, ownerId },
+    }),
+    prisma.task.count({
+      where: { projectId: numericProjectId, deletedAt: { not: null } },
+    }),
+  ]);
 
   if (!project) notFound();
 
   const deleteWithIds = deleteProject.bind(null, { id: projectId });
+
   const description = !project._count.tasks
-    ? `This will permanently delete the project.`
+    ? 'This will permanently delete the project.'
     : project._count.tasks === 1
       ? `This will permanently delete the project and its ${project._count.tasks} task.`
       : `This will permanently delete the project and all ${project._count.tasks} tasks.`;
+
+  const formattedDate = project.createdAt.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 
   return (
     <div className="space-y-6">
       <div>
         <Link
-          href={`/projects/`}
+          href="/projects/"
           className="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           ← Back to projects
         </Link>
       </div>
+
       <div className="flex flex-col gap-4 border-b pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -91,8 +91,7 @@ export default async function ProjectPage({ params }: Props) {
             {project.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Owned by {project.user.name} · Created{' '}
-            {project.createdAt.toDateString()}
+            Owned by {project.user.name} · Created {formattedDate}
           </p>
         </div>
 
@@ -118,6 +117,27 @@ export default async function ProjectPage({ params }: Props) {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="text-base">Deleted tasks</CardTitle>
+                <CardDescription>
+                  {deletedCount === 0
+                    ? 'No deleted tasks'
+                    : `${deletedCount} task${deletedCount === 1 ? '' : 's'} in trash`}
+                </CardDescription>
+              </div>
+              {deletedCount > 0 && (
+                <Link
+                  href={`/projects/${projectId}/trash`}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  View all
+                </Link>
+              )}
+            </CardHeader>
+          </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <div>
@@ -181,15 +201,19 @@ export default async function ProjectPage({ params }: Props) {
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Created
                 </p>
-                <p className="mt-1 font-medium">
-                  {project.createdAt.toDateString()}
-                </p>
+                <p className="mt-1 font-medium">{formattedDate}</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Total tasks
                 </p>
                 <p className="mt-1 font-medium">{project._count.tasks}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Deleted tasks
+                </p>
+                <p className="mt-1 font-medium">{deletedCount}</p>
               </div>
             </CardContent>
           </Card>

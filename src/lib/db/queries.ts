@@ -33,6 +33,58 @@ export async function findTaskInProject<T extends Prisma.TaskSelect>({
   });
 }
 
+export async function findAllDeletedTasks({
+  projectId,
+  assigneeId,
+}: {
+  projectId: number;
+  assigneeId?: number;
+}) {
+  const ownerId = await getCurrentUserId();
+
+  if (!ownerId) {
+    return { error: 'Unauthorized' };
+  }
+
+  try {
+    const result = await prisma.task.findMany({
+      where: {
+        deletedAt: { not: null },
+        projectId,
+        project: {
+          ownerId,
+        },
+        ...(assigneeId && { assigneeId }),
+      },
+      orderBy: { deletedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        priority: true,
+        status: true,
+        deletedAt: true,
+        assignee: { select: { name: true } },
+        logs: {
+          where: {
+            activityType: 'TASK_DELETED',
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            user: { select: { name: true } },
+          },
+        },
+      },
+    });
+
+    return result;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Something went wrong';
+
+    return { error: message };
+  }
+}
+
 export async function findCommentInTasks<T extends Prisma.CommentSelect>({
   taskId,
   projectId,
