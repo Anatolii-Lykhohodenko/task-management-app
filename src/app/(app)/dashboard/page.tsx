@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import {
+  findAllDeletedTasks,
   getDashBoardStats,
   getRecentComments,
   getRecentTasks,
@@ -38,14 +39,16 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-  const [stats, tasks, comments] = await Promise.all([
+  const [stats, tasks, comments, rawDeletedTasks] = await Promise.all([
     getDashBoardStats(),
     getRecentTasks(),
     getRecentComments(),
+    findAllDeletedTasks({ take: 10 })
   ]);
 
   if ('error' in stats) return null;
   const recentTasks = 'error' in tasks ? [] : tasks;
+  const deletedTasks = 'error' in rawDeletedTasks ? [] : rawDeletedTasks;
   const recentComments = 'error' in comments ? [] : comments;
 
   const statCards = [
@@ -174,7 +177,11 @@ export default async function DashboardPage() {
                 { label: 'Low', priority: 'LOW', color: 'bg-slate-400' },
                 { label: 'Medium', priority: 'MEDIUM', color: 'bg-orange-400' },
                 { label: 'High', priority: 'HIGH', color: 'bg-red-500' },
-                { label: 'Urgent', priority: 'URGENT', color: 'bg-red-700' },
+                {
+                  label: 'Critical',
+                  priority: 'CRITICAL',
+                  color: 'bg-red-700',
+                },
               ].map(({ label, priority, color }) => {
                 const count =
                   stats.byPriority.find((p) => p.priority === priority)?._count
@@ -205,7 +212,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Recent Tasks</CardTitle>
@@ -225,6 +232,41 @@ export default async function DashboardPage() {
                   >
                     <Link
                       href={`/projects/${task.projectId}/tasks/${task.id}`}
+                      className="text-sm font-medium hover:underline truncate"
+                    >
+                      {task.title}
+                    </Link>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[task.status]}`}
+                    >
+                      {STATUS_LABEL[task.status]}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Deleted Tasks</CardTitle>
+            <CardDescription>Last 10 deleted tasks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {deletedTasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No deleted tasks yet
+              </p>
+            ) : (
+              <ul className="divide-y">
+                {deletedTasks.map((task) => (
+                  <li
+                    key={task.id}
+                    className="flex items-center justify-between py-2.5 gap-3"
+                  >
+                    <Link
+                      href={`/projects/${task.projectId}/trash?highlight=${task.id}`}
                       className="text-sm font-medium hover:underline truncate"
                     >
                       {task.title}

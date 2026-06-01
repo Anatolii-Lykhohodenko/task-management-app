@@ -36,9 +36,13 @@ export async function findTaskInProject<T extends Prisma.TaskSelect>({
 export async function findAllDeletedTasks({
   projectId,
   assigneeId,
+  take,
+  search,
 }: {
-  projectId: number;
+  projectId?: number;
   assigneeId?: number;
+  take?: number;
+  search?: string;
 }) {
   const ownerId = await getCurrentUserId();
 
@@ -50,16 +54,21 @@ export async function findAllDeletedTasks({
     const result = await prisma.task.findMany({
       where: {
         deletedAt: { not: null },
-        projectId,
         project: {
           ownerId,
         },
+        ...(search && {
+          title: { contains: search, mode: 'insensitive' as Prisma.QueryMode },
+        }),
         ...(assigneeId && { assigneeId }),
+        ...(projectId && { projectId }),
       },
+      ...(take && { take }),
       orderBy: { deletedAt: 'desc' },
       select: {
         id: true,
         title: true,
+        projectId: true,
         priority: true,
         status: true,
         deletedAt: true,

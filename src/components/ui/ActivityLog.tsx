@@ -33,7 +33,9 @@ function formatPayload(type: ActivityType, payload: unknown): string {
           : `assigned this task to ${p.to}`
         : 'removed assignee';
     case 'DUE_DATE_CHANGED':
-      return p?.to ? `set task's due date: ${p.to}` : 'removed due date';
+      return p?.to
+        ? `set due date to ${new Date(p.to).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`
+        : 'removed due date';
     case 'TASK_CREATED':
       return 'created this task';
     case 'TASK_DELETED':
