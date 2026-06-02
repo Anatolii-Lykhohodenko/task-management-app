@@ -13,20 +13,28 @@ import {
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
+import { JsonValue } from '@prisma/client/runtime/client';
 
 type Props = {
   name: string;
-  defaultValue?: Record<string, unknown> | null;
+  defaultValue?: JsonValue;
 };
 
 export default function RichTextEditor({ name, defaultValue }: Props) {
-  const [json, setJson] = useState(
-    defaultValue ? JSON.stringify(defaultValue) : ''
-  );
+  const initialContent =
+    defaultValue &&
+    typeof defaultValue === 'object' &&
+    !Array.isArray(defaultValue)
+      ? (defaultValue as Record<string, unknown>)
+      : '';
+
+  const [json, setJson] = useState(() => {
+    return initialContent ? JSON.stringify(initialContent) : '';
+  });
 
   const editor = useEditor({
     extensions: [StarterKit],
-    content: defaultValue ?? '',
+    content: initialContent,
     onUpdate: ({ editor }) => {
       setJson(JSON.stringify(editor.getJSON()));
     },

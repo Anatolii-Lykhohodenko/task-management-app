@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { Button } from '@/components/ui/button';
+import { JsonValue } from '@prisma/client/runtime/client';
 
 const statuses = Object.values(Status);
 const priorities = Object.values(Priority);
@@ -27,7 +28,7 @@ type Props = {
     title: string;
     status: Status;
     priority: Priority;
-    description?: Record<string, unknown> | null;
+    description?: JsonValue;
     dueDate?: Date | null;
     assignee: {
       id: number;

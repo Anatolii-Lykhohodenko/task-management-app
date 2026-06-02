@@ -82,6 +82,20 @@ export default async function TaskPage({ params, searchParams }: Props) {
     },
   });
 
+  const STATUS_LABEL: Record<string, string> = {
+    OPEN: 'Open',
+    DEVELOPING: 'In Progress',
+    REVIEW: 'Review',
+    CLOSED: 'Closed',
+  };
+
+  const PRIORITY_LABEL: Record<string, string> = {
+    LOW: 'Low',
+    MEDIUM: 'Medium',
+    HIGH: 'High',
+    CRITICAL: 'Critical',
+  };
+
   if (!task) notFound();
 
   const logs = await getActivityLogs({ taskId: numericTaskId });
@@ -241,14 +255,16 @@ export default async function TaskPage({ params, searchParams }: Props) {
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Status
                 </p>
-                <p className="mt-1 font-medium">{task.status}</p>
+                <p className="mt-1 font-medium">{STATUS_LABEL[task.status]}</p>
               </div>
 
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Priority
                 </p>
-                <p className="mt-1 font-medium">{task.priority}</p>
+                <p className="mt-1 font-medium">
+                  {PRIORITY_LABEL[task.priority]}
+                </p>
               </div>
 
               <div>

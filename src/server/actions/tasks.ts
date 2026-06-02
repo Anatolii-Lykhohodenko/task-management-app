@@ -353,6 +353,7 @@ export async function hardDeleteTask({
   }
 
   revalidatePath(`/projects/${projectId}/tasks`);
+  revalidatePath(`/projects/${projectId}/trash`);
 
   return { success: true };
 }
@@ -414,6 +415,8 @@ export async function restoreTask({
     return { success: false, error };
   }
   revalidatePath(`/projects/${projectId}/tasks`);
+  revalidatePath(`/projects/${projectId}/trash`);
+
   return { success: true };
 }
 
@@ -516,7 +519,7 @@ export async function updateTaskPartially({
     const message = err instanceof Error ? err.message : 'Something went wrong';
     return { error: message };
   }
-  revalidatePath(`/projects/${projectId}/tasks?toast=${toast}`);
+  revalidatePath(`/projects/${projectId}/tasks`);
 }
 
 export async function updateTaskStatus({
@@ -568,5 +571,6 @@ export async function updateTaskStatus({
     throw new Error(message);
   }
 
-  revalidatePath(`/projects/${projectId}/board?toast=task_status_updated`);
+  revalidatePath(`/projects/${projectId}/board`);
+  revalidatePath(`/projects/${projectId}/tasks/${taskId}`);
 }
