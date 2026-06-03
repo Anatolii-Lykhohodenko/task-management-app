@@ -38,6 +38,16 @@ const STATUS_BADGE: Record<string, string> = {
   CLOSED: 'bg-green-100 text-green-700',
 };
 
+type StatusStat = {
+  status: string;
+  _count: { status: number };
+};
+
+type PriorityStat = {
+  priority: string;
+  _count: { priority: number };
+};
+
 export default async function DashboardPage() {
   const [stats, tasks, comments, rawDeletedTasks] = await Promise.all([
     getDashBoardStats(),
@@ -57,29 +67,29 @@ export default async function DashboardPage() {
     {
       label: 'Open',
       value:
-        stats.byStatus.find((task) => task.status === 'OPEN')?._count.status ??
-        0,
+        stats.byStatus.find((task: StatusStat) => task.status === 'OPEN')
+          ?._count.status ?? 0,
       icon: CircleDot,
     },
     {
       label: 'In Progress',
       value:
-        stats.byStatus.find((task) => task.status === 'DEVELOPING')?._count
-          .status ?? 0,
+        stats.byStatus.find((task: StatusStat) => task.status === 'DEVELOPING')
+          ?._count.status ?? 0,
       icon: Code,
     },
     {
       label: 'Review',
       value:
-        stats.byStatus.find((task) => task.status === 'REVIEW')?._count
-          .status ?? 0,
+        stats.byStatus.find((task: StatusStat) => task.status === 'REVIEW')
+          ?._count.status ?? 0,
       icon: Eye,
     },
     {
       label: 'Closed',
       value:
-        stats.byStatus.find((task) => task.status === 'CLOSED')?._count
-          .status ?? 0,
+        stats.byStatus.find((task: StatusStat) => task.status === 'CLOSED')
+          ?._count.status ?? 0,
       icon: CheckCircle2,
     },
     {
@@ -140,8 +150,8 @@ export default async function DashboardPage() {
                 { label: 'Closed', status: 'CLOSED', color: 'bg-green-500' },
               ].map(({ label, status, color }) => {
                 const count =
-                  stats.byStatus.find((s) => s.status === status)?._count
-                    .status ?? 0;
+                  stats.byStatus.find((s: StatusStat) => s.status === status)
+                    ?._count.status ?? 0;
                 const pct = Math.round((count / stats.tasksCount) * 100);
                 return (
                   <div key={status} className="space-y-1">
@@ -184,8 +194,9 @@ export default async function DashboardPage() {
                 },
               ].map(({ label, priority, color }) => {
                 const count =
-                  stats.byPriority.find((p) => p.priority === priority)?._count
-                    .priority ?? 0;
+                  stats.byPriority.find(
+                    (p: PriorityStat) => p.priority === priority
+                  )?._count.priority ?? 0;
                 const pct = Math.round((count / stats.tasksCount) * 100);
                 return (
                   <div key={priority} className="space-y-1">
