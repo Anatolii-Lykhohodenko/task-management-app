@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
+import type { Status, Priority } from '@/types';
 
 export const metadata = { title: 'Dashboard' };
 
@@ -236,24 +237,35 @@ export default async function DashboardPage() {
               </p>
             ) : (
               <ul className="divide-y">
-                {recentTasks.map((task) => (
-                  <li
-                    key={task.id}
-                    className="flex items-center justify-between py-2.5 gap-3"
-                  >
-                    <Link
-                      href={`/projects/${task.projectId}/tasks/${task.id}`}
-                      className="text-sm font-medium hover:underline truncate"
+                {recentTasks.map(
+                  (task: {
+                    id: number;
+                    createdAt: Date;
+                    project: {
+                      name: string;
+                    };
+                    title: string;
+                    status: Status;
+                    projectId: number;
+                  }) => (
+                    <li
+                      key={task.id}
+                      className="flex items-center justify-between py-2.5 gap-3"
                     >
-                      {task.title}
-                    </Link>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[task.status]}`}
-                    >
-                      {STATUS_LABEL[task.status]}
-                    </span>
-                  </li>
-                ))}
+                      <Link
+                        href={`/projects/${task.projectId}/tasks/${task.id}`}
+                        className="text-sm font-medium hover:underline truncate"
+                      >
+                        {task.title}
+                      </Link>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[task.status]}`}
+                      >
+                        {STATUS_LABEL[task.status]}
+                      </span>
+                    </li>
+                  )
+                )}
               </ul>
             )}
           </CardContent>
@@ -271,24 +283,41 @@ export default async function DashboardPage() {
               </p>
             ) : (
               <ul className="divide-y">
-                {deletedTasks.map((task) => (
-                  <li
-                    key={task.id}
-                    className="flex items-center justify-between py-2.5 gap-3"
-                  >
-                    <Link
-                      href={`/projects/${task.projectId}/trash?highlight=${task.id}`}
-                      className="text-sm font-medium hover:underline truncate"
+                {deletedTasks.map(
+                  (task: {
+                    id: number;
+                    title: string;
+                    status: Status;
+                    priority: Priority;
+                    deletedAt: Date | null;
+                    projectId: number;
+                    logs: {
+                      user: {
+                        name: string;
+                      } | null;
+                    }[];
+                    assignee: {
+                      name: string;
+                    } | null;
+                  }) => (
+                    <li
+                      key={task.id}
+                      className="flex items-center justify-between py-2.5 gap-3"
                     >
-                      {task.title}
-                    </Link>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[task.status]}`}
-                    >
-                      {STATUS_LABEL[task.status]}
-                    </span>
-                  </li>
-                ))}
+                      <Link
+                        href={`/projects/${task.projectId}/trash?highlight=${task.id}`}
+                        className="text-sm font-medium hover:underline truncate"
+                      >
+                        {task.title}
+                      </Link>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[task.status]}`}
+                      >
+                        {STATUS_LABEL[task.status]}
+                      </span>
+                    </li>
+                  )
+                )}
               </ul>
             )}
           </CardContent>
