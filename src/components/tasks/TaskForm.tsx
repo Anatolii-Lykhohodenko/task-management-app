@@ -1,8 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { Status, Priority } from '@prisma/client';
-import { Action } from '@/types';
+import { Action, Status, Priority } from '@/types';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -14,10 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { Button } from '@/components/ui/button';
-import { JsonValue } from '@prisma/client/runtime/client';
-
-const statuses = Object.values(Status);
-const priorities = Object.values(Priority);
+import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 
 type Props = {
   serverAction: Action;
@@ -28,7 +24,7 @@ type Props = {
     title: string;
     status: Status;
     priority: Priority;
-    description?: JsonValue;
+    description?: unknown;
     dueDate?: Date | null;
     assignee: {
       id: number;
@@ -54,10 +50,10 @@ export function TaskForm({
 }: Props) {
   const [state, action, isPending] = useActionState(serverAction, null);
   const [status, setStatus] = useState<string>(
-    defaultValues?.status ?? Status.OPEN
+    defaultValues?.status ?? 'OPEN'
   );
   const [priority, setPriority] = useState<string>(
-    defaultValues?.priority ?? Priority.MEDIUM
+    defaultValues?.priority ?? 'MEDIUM'
   );
   const [assigneeId, setAssigneeId] = useState<string>(
     defaultValues?.assignee?.id
@@ -100,7 +96,7 @@ export function TaskForm({
               align="start"
               sideOffset={4}
             >
-              {statuses.map((s) => (
+              {TASK_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
                 </SelectItem>
@@ -123,7 +119,7 @@ export function TaskForm({
               align="start"
               sideOffset={4}
             >
-              {priorities.map((p) => (
+              {TASK_PRIORITIES.map((p) => (
                 <SelectItem key={p} value={p}>
                   {p}
                 </SelectItem>

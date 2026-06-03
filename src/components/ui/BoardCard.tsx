@@ -1,9 +1,22 @@
 'use client';
 
 import { DueDateBadge } from '@/components/ui/DueDataBadge';
+import { Priority, Status } from '@/types';
 import { useDraggable } from '@dnd-kit/core';
-import { Status, Task } from '@prisma/client';
 import Link from 'next/link';
+
+type Task = {
+  id: number;
+  title: string;
+  description: unknown;
+  status: Status;
+  priority: Priority;
+  createdAt: Date;
+  deletedAt: Date | null;
+  dueDate: Date | null;
+  projectId: number;
+  assigneeId: number | null;
+};
 
 type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'> & {
   assignee: { name: string } | null;

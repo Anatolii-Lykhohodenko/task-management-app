@@ -1,7 +1,6 @@
 'use client';
 
 import { updateTaskPartially } from '@/server/actions/tasks';
-import { Priority, Status } from '@prisma/client';
 import { TASK_STATUSES, TASK_PRIORITIES } from '@/constants/task';
 import {
   Select,
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Priority, Status } from '@/types';
 
 type Props = {
   task: {

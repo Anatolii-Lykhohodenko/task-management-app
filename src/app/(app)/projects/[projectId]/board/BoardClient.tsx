@@ -1,7 +1,6 @@
 'use client';
 
 import { updateTaskStatus } from '@/server/actions/tasks';
-import { Status, Task } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import {
   DndContext,
@@ -16,7 +15,20 @@ import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import BoardColumn from '../../../../../components/ui/BoardColumn';
 import BoardCard from '@/components/ui/BoardCard';
+import { Priority, Status } from '@/types';
 
+type Task = {
+  id: number;
+  title: string;
+  createdAt: Date;
+  description: unknown;
+  status: Status;
+  priority: Priority;
+  deletedAt: Date | null;
+  dueDate: Date | null;
+  projectId: number;
+  assigneeId: number | null;
+};
 type BoardTask = Pick<Task, 'id' | 'title' | 'status' | 'priority'> & {
   assignee: { name: string } | null;
   dueDate: Date | null;

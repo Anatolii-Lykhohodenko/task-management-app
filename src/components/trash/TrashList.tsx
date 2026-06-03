@@ -1,11 +1,11 @@
 'use client';
 
-import { Priority, Status } from '@prisma/client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogYesOrNo } from '@/components/ui/DialogYesOrNo';
+import { Priority, Status } from '@/types';
 
 type Task = {
   id: number;

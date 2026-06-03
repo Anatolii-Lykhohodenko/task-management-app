@@ -1,6 +1,5 @@
 'use client';
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
-import { Priority, Status } from '@prisma/client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
@@ -14,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SortByParam } from '@/constants';
+import { Priority, Status } from '@/types';
 
 type Props = {
   search: string;

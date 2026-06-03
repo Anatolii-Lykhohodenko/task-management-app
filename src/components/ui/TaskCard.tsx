@@ -2,9 +2,9 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import { Priority, Status } from '@prisma/client';
 import { TaskProperties } from '@/components/ui/TaskPropeties';
 import { DueDateBadge } from '@/components/ui/DueDataBadge';
+import { Priority, Status } from '@/types';
 
 type Props = {
   task: {

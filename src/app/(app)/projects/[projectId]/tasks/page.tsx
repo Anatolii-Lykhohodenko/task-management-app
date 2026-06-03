@@ -12,7 +12,6 @@ import {
 import { notFound } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { getAssignees, getTasks } from '@/lib/db/queries';
-import { Priority, Status } from '@prisma/client';
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import TaskCard from '@/components/ui/TaskCard';
@@ -20,6 +19,7 @@ import ViewToggle from '@/components/ui/ViewToggle';
 import { parseSortBy } from '@/helpers';
 import { SortByParam } from '@/constants';
 import { ToastHandler } from '@/components/ui/ToastHandler';
+import { Priority, Status } from '@/types';
 
 type Props = {
   params: Promise<{

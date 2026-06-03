@@ -1,3 +1,5 @@
+import { TASK_PRIORITIES, TASK_STATUSES } from "@/constants/task";
+
 export type ActionState = {
   error?: string;
   success?: boolean;
@@ -22,3 +24,6 @@ export type SortByType =
   | { createdAt: 'desc' }
   | { dueDate: 'asc' }
   | { dueDate: 'desc' };
+
+export type Status = (typeof TASK_STATUSES)[number];
+export type Priority = (typeof TASK_PRIORITIES)[number];

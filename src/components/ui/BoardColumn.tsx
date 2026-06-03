@@ -1,7 +1,7 @@
 'use client';
 
+import { Status } from '@/types';
 import { useDroppable } from '@dnd-kit/core';
-import { Status } from '@prisma/client';
 
 type Props = {
   id: Status;
