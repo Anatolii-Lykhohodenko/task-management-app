@@ -13,11 +13,10 @@ import {
 } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
-import { JsonValue } from '@prisma/client/runtime/client';
 
 type Props = {
   name: string;
-  defaultValue?: JsonValue;
+  defaultValue?: unknown;
 };
 
 export default function RichTextEditor({ name, defaultValue }: Props) {
