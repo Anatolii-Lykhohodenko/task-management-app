@@ -206,15 +206,50 @@ export async function updateTask(_prevState: ActionState, formData: FormData) {
   }
 
   try {
-    const promises = changes.map((change) =>
-      prisma.activityLog.create({
-        data: {
-          taskId: task.id,
-          userId: ownerId,
-          activityType: change.action,
-          ...(change.payload && { payload: change.payload }),
-        },
-      })
+    const promises = changes.map(
+      (
+        change:
+          | {
+              action: 'DUE_DATE_CHANGED';
+              payload: {
+                from: string | undefined;
+                to: string | undefined;
+              };
+            }
+          | {
+              action:
+                | 'STATUS_CHANGED'
+                | 'PRIORITY_CHANGED'
+                | 'ASSIGNEE_CHANGED';
+              payload: {
+                from: Status | Priority;
+                to:
+                  | 'OPEN'
+                  | 'DEVELOPING'
+                  | 'REVIEW'
+                  | 'CLOSED'
+                  | 'LOW'
+                  | 'MEDIUM'
+                  | 'HIGH'
+                  | 'CRITICAL';
+              };
+            }
+          | {
+              action: 'ASSIGNEE_CHANGED';
+              payload: {
+                from: string | undefined;
+                to: string | undefined;
+              };
+            }
+      ) =>
+        prisma.activityLog.create({
+          data: {
+            taskId: task.id,
+            userId: ownerId,
+            activityType: change.action,
+            ...(change.payload && { payload: change.payload }),
+          },
+        })
     );
     await Promise.all([
       prisma.task.update({
@@ -493,15 +528,22 @@ export async function updateTaskPartially({
   }
 
   try {
-    const promises = changes.map((change) =>
-      prisma.activityLog.create({
-        data: {
-          taskId: task.id,
-          userId,
-          activityType: change.action,
-          ...(change.payload && { payload: change.payload }),
-        },
-      })
+    const promises = changes.map(
+      (change: {
+        action: 'STATUS_CHANGED' | 'PRIORITY_CHANGED' | 'ASSIGNEE_CHANGED';
+        payload: {
+          from: Status | Priority;
+          to: Status | Priority;
+        };
+      }) =>
+        prisma.activityLog.create({
+          data: {
+            taskId: task.id,
+            userId,
+            activityType: change.action,
+            ...(change.payload && { payload: change.payload }),
+          },
+        })
     );
     await Promise.all([
       prisma.task.update({

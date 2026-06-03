@@ -86,7 +86,7 @@ export default function BoardClient({ projectId, initialTasks }: Props) {
     if (!task || task.status === newStatus) return;
 
     setTasks((prevTasks) =>
-      prevTasks.map((task) =>
+      prevTasks.map((task: BoardTask) =>
         task.id === taskId ? { ...task, status: newStatus } : task
       )
     );
@@ -145,7 +145,7 @@ export default function BoardClient({ projectId, initialTasks }: Props) {
               </div>
             ) : (
               <div className="space-y-2">
-                {columns[key].map((task) => (
+                {columns[key].map((task: BoardTask) => (
                   <BoardCard
                     key={task.id}
                     task={task}
@@ -180,7 +180,7 @@ export default function BoardClient({ projectId, initialTasks }: Props) {
                     No tasks
                   </p>
                 ) : (
-                  columns[key].map((task) => (
+                  columns[key].map((task: BoardTask) => (
                     <BoardCard
                       key={task.id}
                       task={task}

@@ -73,31 +73,38 @@ export default async function ProjectsPage() {
           </Card>
         ) : (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {projects.map((project) => (
-              <Card
-                key={project.id}
-                className="transition-colors hover:bg-muted/40"
-              >
-                <CardHeader className="space-y-2">
-                  <CardTitle className="text-base">
-                    <Link
-                      href={`/projects/${project.id}`}
-                      className="hover:underline"
-                    >
-                      {project.name}
-                    </Link>
-                  </CardTitle>
-                  <CardDescription>
-                    Created {project.createdAt.toDateString()}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button asChild variant="secondary" className="w-full">
-                    <Link href={`/projects/${project.id}`}>Open project</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {projects.map(
+              (project: {
+                name: string;
+                id: number;
+                createdAt: Date;
+                ownerId: number;
+              }) => (
+                <Card
+                  key={project.id}
+                  className="transition-colors hover:bg-muted/40"
+                >
+                  <CardHeader className="space-y-2">
+                    <CardTitle className="text-base">
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="hover:underline"
+                      >
+                        {project.name}
+                      </Link>
+                    </CardTitle>
+                    <CardDescription>
+                      Created {project.createdAt.toDateString()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button asChild variant="secondary" className="w-full">
+                      <Link href={`/projects/${project.id}`}>Open project</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            )}
           </div>
         )}
       </div>

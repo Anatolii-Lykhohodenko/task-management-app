@@ -106,7 +106,7 @@ export default function CommentItem({
 
       {comment.replies.length > 0 && (
         <div className="ml-11 space-y-3 border-l pl-4">
-          {comment.replies.map((reply) => (
+          {comment.replies.map((reply: Reply) => (
             <ReplyItem
               key={reply.id}
               reply={reply}

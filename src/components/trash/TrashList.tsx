@@ -111,7 +111,7 @@ export function TrashList({
 
   return (
     <ul className="space-y-2">
-      {tasks.map((task) => {
+      {tasks.map((task: Task) => {
         const diffDays = task.deletedAt
           ? Math.round((+new Date() - +task.deletedAt) / (1000 * 60 * 60 * 24))
           : null;

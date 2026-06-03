@@ -13,6 +13,7 @@ import {
 import { deleteProject } from '@/server/actions/projects';
 import { DialogYesOrNo } from '@/components/ui/DialogYesOrNo';
 import { getCurrentUserId } from '@/lib/server/auth';
+import type { Priority, Status } from '@/types';
 
 type Props = {
   params: Promise<{ projectId: string }>;
@@ -160,24 +161,31 @@ export default async function ProjectPage({ params }: Props) {
                 </div>
               ) : (
                 <ul className="divide-y">
-                  {project.tasks.map((task) => (
-                    <li key={task.id}>
-                      <Link
-                        href={`/projects/${projectId}/tasks/${task.id}`}
-                        className="flex items-start justify-between gap-4 rounded-md px-2 py-2 transition-colors hover:bg-muted/50"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
-                            {task.title}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                          <Badge variant="secondary">{task.status}</Badge>
-                          <Badge variant="outline">{task.priority}</Badge>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
+                  {project.tasks.map(
+                    (task: {
+                      id: number;
+                      title: string;
+                      status: Status;
+                      priority: Priority;
+                    }) => (
+                      <li key={task.id}>
+                        <Link
+                          href={`/projects/${projectId}/tasks/${task.id}`}
+                          className="flex items-start justify-between gap-4 rounded-md px-2 py-2 transition-colors hover:bg-muted/50"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                              {task.title}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <Badge variant="secondary">{task.status}</Badge>
+                            <Badge variant="outline">{task.priority}</Badge>
+                          </div>
+                        </Link>
+                      </li>
+                    )
+                  )}
                 </ul>
               )}
             </CardContent>

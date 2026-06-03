@@ -207,13 +207,24 @@ export default async function TasksPage({ params, searchParams }: Props) {
             </Card>
           ) : (
             <div className="space-y-3">
-              {tasks.map((task) => (
-                <TaskCard
-                  task={task}
-                  projectId={numericProjectId}
-                  key={task.id}
-                />
-              ))}
+              {tasks.map(
+                (task: {
+                  id: number;
+                  title: string;
+                  status: Status;
+                  priority: Priority;
+                  dueDate: Date | null;
+                  assignee: {
+                    name: string;
+                  } | null;
+                }) => (
+                  <TaskCard
+                    task={task}
+                    projectId={numericProjectId}
+                    key={task.id}
+                  />
+                )
+              )}
             </div>
           )}
         </div>

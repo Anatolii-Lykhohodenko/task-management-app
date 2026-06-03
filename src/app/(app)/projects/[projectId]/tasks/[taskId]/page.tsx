@@ -155,19 +155,38 @@ export default async function TaskPage({ params, searchParams }: Props) {
             <CardContent className="space-y-4">
               {task.comments.length > 0 && (
                 <div className="space-y-4">
-                  {task.comments.map((comment) => {
-                    return (
-                      <CommentItem
-                        deleteAction={deleteComment}
-                        createComment={createComment}
-                        key={comment.id}
-                        comment={comment}
-                        projectId={numericProjectId}
-                        taskId={numericTaskId}
-                        currentUserId={userId}
-                      />
-                    );
-                  })}
+                  {task.comments.map(
+                    (comment: {
+                      user: {
+                        name: string;
+                        id: number;
+                      };
+                      id: number;
+                      createdAt: Date;
+                      text: string;
+                      replies: {
+                        user: {
+                          name: string;
+                          id: number;
+                        };
+                        id: number;
+                        createdAt: Date;
+                        text: string;
+                      }[];
+                    }) => {
+                      return (
+                        <CommentItem
+                          deleteAction={deleteComment}
+                          createComment={createComment}
+                          key={comment.id}
+                          comment={comment}
+                          projectId={numericProjectId}
+                          taskId={numericTaskId}
+                          currentUserId={userId}
+                        />
+                      );
+                    }
+                  )}
                 </div>
               )}
 

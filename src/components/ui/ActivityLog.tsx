@@ -76,7 +76,7 @@ export default function ActivityLog({ logs }: Props) {
           <p className="text-sm text-muted-foreground">No activity recorded.</p>
         ) : (
           <ol className="relative space-y-4 border-l border-border pl-4">
-            {logs.map((log) => (
+            {logs.map((log: ActivityLogEntry) => (
               <li key={log.id} className="relative">
                 <span className="absolute -left-[1.3rem] mt-1 flex h-4 w-4 items-center justify-center rounded-full bg-muted ring-2 ring-background">
                   <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
