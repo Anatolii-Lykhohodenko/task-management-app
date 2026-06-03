@@ -2,7 +2,6 @@ import prisma from '@/lib/db/client';
 import { notFound } from 'next/navigation';
 import { getCurrentUserId } from '@/lib/server/auth';
 import { getTasks } from '@/lib/db/queries';
-import { Priority } from '@prisma/client';
 import { TASK_PRIORITIES } from '@/constants/task';
 import BoardClient from '@/app/(app)/projects/[projectId]/board/BoardClient';
 import Link from 'next/link';
@@ -10,6 +9,7 @@ import ViewToggle from '@/components/ui/ViewToggle';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import { SortByParam } from '@/constants';
 import { parseSortBy } from '@/helpers';
+import { Priority } from '@/types';
 
 type Props = {
   params: Promise<{
