@@ -335,23 +335,37 @@ export default async function DashboardPage() {
               </p>
             ) : (
               <ul className="divide-y">
-                {recentComments.map((comment) => (
-                  <li key={comment.id} className="py-2.5 space-y-0.5">
-                    <Link
-                      href={`/projects/${comment.task.projectId}/tasks/${comment.task.id}`}
-                      className="text-sm font-medium hover:underline"
-                    >
-                      {comment.task.title}
-                    </Link>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {comment.text}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {comment.task.project.name} ·{' '}
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </p>
-                  </li>
-                ))}
+                {recentComments.map(
+                  (comment: {
+                    id: number;
+                    createdAt: Date;
+                    text: string;
+                    task: {
+                      id: number;
+                      project: {
+                        name: string;
+                      };
+                      title: string;
+                      projectId: number;
+                    };
+                  }) => (
+                    <li key={comment.id} className="py-2.5 space-y-0.5">
+                      <Link
+                        href={`/projects/${comment.task.projectId}/tasks/${comment.task.id}`}
+                        className="text-sm font-medium hover:underline"
+                      >
+                        {comment.task.title}
+                      </Link>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {comment.text}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {comment.task.project.name} ·{' '}
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                      </p>
+                    </li>
+                  )
+                )}
               </ul>
             )}
           </CardContent>
