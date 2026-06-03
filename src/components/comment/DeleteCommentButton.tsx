@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Action } from '@/types';
+import type { Action } from '@/types';
 
 type Props = {
   serverAction: Action;

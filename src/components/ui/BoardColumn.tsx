@@ -1,6 +1,6 @@
 'use client';
 
-import { Status } from '@/types';
+import type { Status } from '@/types';
 import { useDroppable } from '@dnd-kit/core';
 
 type Props = {

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { TaskProperties } from '@/components/ui/TaskPropeties';
 import { DueDateBadge } from '@/components/ui/DueDataBadge';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 
 type Props = {
   task: {

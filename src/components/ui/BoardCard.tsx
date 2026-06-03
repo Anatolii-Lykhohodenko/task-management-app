@@ -1,7 +1,7 @@
 'use client';
 
 import { DueDateBadge } from '@/components/ui/DueDataBadge';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 import { useDraggable } from '@dnd-kit/core';
 import Link from 'next/link';
 

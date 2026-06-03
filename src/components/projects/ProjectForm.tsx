@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Action } from '@/types';
+import type { Action } from '@/types';
 
 type Props = {
   serverAction: Action,

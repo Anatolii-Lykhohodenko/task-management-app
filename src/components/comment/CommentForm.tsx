@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
-import { Action } from '@/types';
+import type { Action } from '@/types';
 import {
   Dispatch,
   SetStateAction,

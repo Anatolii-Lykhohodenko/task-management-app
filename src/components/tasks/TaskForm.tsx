@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { Action, Status, Priority } from '@/types';
+import type { Action, Status, Priority } from '@/types';
 import { Label } from '@/components/ui/label';
 import {
   Select,

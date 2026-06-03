@@ -1,7 +1,7 @@
 'use client';
 import { TrashList } from '@/components/trash/TrashList';
 import { Input } from '@/components/ui/input';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 import { debounce } from 'lodash';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';

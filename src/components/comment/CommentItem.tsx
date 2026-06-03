@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import CommentForm from '@/components/comment/CommentForm';
 import DeleteCommentButton from '@/components/comment/DeleteCommentButton';
-import { Action, Reply } from '@/types';
+import type { Action, Reply } from '@/types';
 import { updateComment } from '@/server/actions/comments';
 import ReplyItem from '@/components/comment/ReplyItem';
 

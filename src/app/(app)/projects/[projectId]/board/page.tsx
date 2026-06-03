@@ -9,7 +9,7 @@ import ViewToggle from '@/components/ui/ViewToggle';
 import TaskFilters from '@/components/tasks/TaskFilters';
 import { SortByParam } from '@/constants';
 import { parseSortBy } from '@/helpers';
-import { Priority } from '@/types';
+import type { Priority } from '@/types';
 
 type Props = {
   params: Promise<{

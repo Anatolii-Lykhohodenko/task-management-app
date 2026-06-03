@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SortByParam } from '@/constants';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 
 type Props = {
   search: string;

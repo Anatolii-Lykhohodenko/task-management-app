@@ -15,7 +15,7 @@ import { restrictToFirstScrollableAncestor } from '@dnd-kit/modifiers';
 
 import BoardColumn from '../../../../../components/ui/BoardColumn';
 import BoardCard from '@/components/ui/BoardCard';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 
 type Task = {
   id: number;

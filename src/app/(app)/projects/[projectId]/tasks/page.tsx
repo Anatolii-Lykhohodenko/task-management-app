@@ -19,7 +19,7 @@ import ViewToggle from '@/components/ui/ViewToggle';
 import { parseSortBy } from '@/helpers';
 import { SortByParam } from '@/constants';
 import { ToastHandler } from '@/components/ui/ToastHandler';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 
 type Props = {
   params: Promise<{

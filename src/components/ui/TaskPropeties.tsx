@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Priority, Status } from '@/types';
+import type { Priority, Status } from '@/types';
 
 type Props = {
   task: {
