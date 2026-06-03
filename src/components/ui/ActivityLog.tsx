@@ -1,4 +1,3 @@
-import { ActivityType } from '@prisma/client';
 import {
   Card,
   CardHeader,
@@ -7,6 +6,16 @@ import {
   CardContent,
 } from '@/components/ui/card';
 
+type ActivityType =
+  | 'TASK_CREATED'
+  | 'STATUS_CHANGED'
+  | 'PRIORITY_CHANGED'
+  | 'ASSIGNEE_CHANGED'
+  | 'COMMENT_ADDED'
+  | 'DUE_DATE_CHANGED'
+  | 'TASK_DELETED'
+  | 'TASK_RESTORED';
+  
 type ActivityLogEntry = {
   id: number;
   activityType: ActivityType;
