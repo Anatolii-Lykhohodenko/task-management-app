@@ -24,7 +24,8 @@ Organize projects, track tasks with priorities and due dates, collaborate with t
 
 | Dashboard | Projects |
 |-----------|----------|
-| ![Dashboard](<!-- add screenshot url -->) | ![Projects](<!-- add screenshot url -->) |
+| ![Dashboard](<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/6b680a3b-30bd-4c1f-a2cd-58dc8c631882" />
+) | ![Projects](<!-- add screenshot url -->) |
 
 | Task Board | Task Detail |
 |------------|-------------|
