@@ -1,4 +1,5 @@
 'use client';
+
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/constants/task';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -13,7 +14,30 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SortByParam } from '@/constants';
+import { X, User, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { Priority, Status } from '@/types';
+
+const STATUS_LABEL: Record<string, string> = {
+  OPEN: 'Open',
+  DEVELOPING: 'In Progress',
+  REVIEW: 'Review',
+  CLOSED: 'Closed',
+};
+
+const PRIORITY_LABEL: Record<string, string> = {
+  LOW: 'Low',
+  MEDIUM: 'Medium',
+  HIGH: 'High',
+  CRITICAL: 'Critical',
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  OPEN: 'bg-blue-500/10 text-blue-500',
+  DEVELOPING: 'bg-amber-500/10 text-amber-500',
+  REVIEW: 'bg-violet-500/10 text-violet-500',
+  CLOSED: 'bg-emerald-500/10 text-emerald-500',
+};
 
 type Props = {
   search: string;
@@ -47,7 +71,7 @@ export default function TaskFilters({
         params.delete(key);
       }
       router.push(`?${params.toString()}`);
-      router.refresh()
+      router.refresh();
     },
     [router, searchParams]
   );
@@ -57,12 +81,9 @@ export default function TaskFilters({
     [updateParam]
   );
 
-  useEffect(() => {
-    return () => debounced.cancel();
-  }, [debounced]);
+  useEffect(() => () => debounced.cancel(), [debounced]);
 
   const isDefaultSort = sortBy === 'createdAt_desc';
-
   const hasFilters = skipStatus
     ? !!search || !!priority || !isDefaultSort || myTasks || overdue
     : !!search ||
@@ -79,25 +100,39 @@ export default function TaskFilters({
 
   return (
     <div className="flex flex-col gap-2">
+      {/* Quick filter toggles */}
       <div className="flex gap-2">
         <Button
-          variant={myTasks ? 'default' : 'outline'}
+          variant="ghost"
           size="sm"
-          className="h-8"
+          className={cn(
+            'h-7 gap-1.5 px-2.5 text-xs',
+            myTasks
+              ? 'bg-primary/10 text-primary hover:bg-primary/15'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
           onClick={() => updateParam('myTasks', myTasks ? null : 'true')}
         >
+          <User className="h-3 w-3" />
           My Tasks
         </Button>
         <Button
-          variant={overdue ? 'default' : 'outline'}
+          variant="ghost"
           size="sm"
-          className="h-8"
+          className={cn(
+            'h-7 gap-1.5 px-2.5 text-xs',
+            overdue
+              ? 'bg-red-500/10 text-red-500 hover:bg-red-500/15'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
           onClick={() => updateParam('overdue', overdue ? null : 'true')}
         >
+          <AlertCircle className="h-3 w-3" />
           Overdue
         </Button>
       </div>
 
+      {/* Search + selects */}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <Input
           value={searchValue}
@@ -115,7 +150,7 @@ export default function TaskFilters({
               value={status ?? ''}
               onValueChange={(val) => updateParam('status', val || null)}
             >
-              <SelectTrigger className="w-full sm:w-36">
+              <SelectTrigger className="h-8 w-full sm:w-34">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent
@@ -126,7 +161,14 @@ export default function TaskFilters({
               >
                 {TASK_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s}
+                    <span
+                      className={cn(
+                        'rounded px-1.5 py-0.5 text-xs font-medium',
+                        STATUS_STYLES[s]
+                      )}
+                    >
+                      {STATUS_LABEL[s]}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -137,7 +179,7 @@ export default function TaskFilters({
             value={priority ?? ''}
             onValueChange={(val) => updateParam('priority', val || null)}
           >
-            <SelectTrigger className="w-full sm:w-36">
+            <SelectTrigger className="h-8 w-full sm:w-34">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent
@@ -148,7 +190,7 @@ export default function TaskFilters({
             >
               {TASK_PRIORITIES.map((p) => (
                 <SelectItem key={p} value={p}>
-                  {p}
+                  {PRIORITY_LABEL[p]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -160,7 +202,7 @@ export default function TaskFilters({
             value={sortBy}
             onValueChange={(val) => updateParam('sortBy', val)}
           >
-            <SelectTrigger className="w-full sm:w-44">
+            <SelectTrigger className="h-8 w-full sm:w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent
@@ -181,9 +223,10 @@ export default function TaskFilters({
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="w-full sm:w-auto"
+              className="h-8 gap-1.5 px-2.5 text-xs text-muted-foreground hover:text-foreground sm:w-auto"
             >
-              Clear filters
+              <X className="h-3 w-3" />
+              Clear
             </Button>
           )}
         </div>

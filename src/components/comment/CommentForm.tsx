@@ -19,10 +19,8 @@ type Props = {
   commentId?: number;
   userId: number;
   parentId?: number;
-  defaultValues?: {
-    text: string;
-  };
-  onCancel?: Dispatch<SetStateAction<boolean>>;
+  defaultValues?: { text: string };
+  onCancel?: Dispatch<SetStateAction<boolean>> | (() => void);
 };
 
 export default function CommentForm({
@@ -48,11 +46,12 @@ export default function CommentForm({
   }, []);
 
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} className="space-y-2">
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="taskId" value={taskId} />
       <input type="hidden" name="userId" value={userId} />
       {commentId && <input type="hidden" name="commentId" value={commentId} />}
+      {parentId && <input type="hidden" name="parentId" value={parentId} />}
 
       <Textarea
         ref={textareaRef}
@@ -64,30 +63,40 @@ export default function CommentForm({
         }}
         name="text"
         placeholder={
-          defaultValues ? 'Edit your comment...' : 'Write a comment...'
+          defaultValues
+            ? 'Edit your comment…'
+            : 'Write a comment… (Enter to send)'
         }
         defaultValue={defaultValues?.text ?? ''}
-        rows={3}
+        rows={defaultValues ? 3 : 2}
         className="resize-none text-sm"
       />
 
-      {parentId && <input type="hidden" name="parentId" value={parentId} />}
       {state?.error && (
         <p className="text-xs text-destructive">{state.error}</p>
       )}
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
         {onCancel && (
-          <Button type="button" size="sm" onClick={() => onCancel(false)}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2.5 text-xs"
+            onClick={() =>
+              typeof onCancel === 'function' && onCancel(false as never)
+            }
+          >
             Cancel
           </Button>
         )}
-        <Button type="submit" size="sm" disabled={isPending}>
-          {isPending
-            ? 'Saving...'
-            : defaultValues
-              ? 'Save changes'
-              : 'Add comment'}
+        <Button
+          type="submit"
+          size="sm"
+          className="h-7 px-2.5 text-xs"
+          disabled={isPending}
+        >
+          {isPending ? 'Saving…' : defaultValues ? 'Save changes' : 'Send'}
         </Button>
       </div>
     </form>

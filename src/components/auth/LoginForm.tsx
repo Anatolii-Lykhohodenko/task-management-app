@@ -18,29 +18,32 @@ import {
 type Props = { callbackUrl: string };
 
 export default function LoginForm({ callbackUrl }: Props) {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
   const [state, action, isPending] = useActionState(login, null);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/20 px-4 py-10">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
+      <div className="w-full max-w-sm space-y-6">
+        {/* Logo */}
+        <div className="flex justify-center">
           <Link href="/projects" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
               T
             </div>
             <div>
               <p className="text-sm font-semibold leading-none">Taskify</p>
-              <p className="mt-1 text-xs text-muted-foreground">Workspace</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Workspace</p>
             </div>
           </Link>
         </div>
 
         <Card className="shadow-sm">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl tracking-tight">Login</CardTitle>
-            <CardDescription>
-              Enter your email and password to continue.
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl tracking-tight">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Enter your credentials to continue.
             </CardDescription>
           </CardHeader>
 
@@ -48,8 +51,10 @@ export default function LoginForm({ callbackUrl }: Props) {
             <form action={action} className="space-y-4">
               <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   name="email"
@@ -60,8 +65,10 @@ export default function LoginForm({ callbackUrl }: Props) {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-sm">
+                  Password
+                </Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -80,7 +87,7 @@ export default function LoginForm({ callbackUrl }: Props) {
                       showPassword ? 'Hide password' : 'Show password'
                     }
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>
@@ -95,11 +102,11 @@ export default function LoginForm({ callbackUrl }: Props) {
               )}
 
               <Button type="submit" disabled={isPending} className="w-full">
-                {isPending ? 'Logging in...' : 'Login'}
+                {isPending ? 'Logging in…' : 'Log in'}
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="mt-5 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{' '}
               <Link
                 href={`/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
@@ -107,7 +114,7 @@ export default function LoginForm({ callbackUrl }: Props) {
               >
                 Register
               </Link>
-            </div>
+            </p>
           </CardContent>
         </Card>
       </div>

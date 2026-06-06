@@ -7,7 +7,6 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
 } from '@/components/ui/card';
 import { findTaskInProject, getActivityLogs } from '@/lib/db/queries';
@@ -19,6 +18,9 @@ import { TaskProperties } from '@/components/ui/TaskPropeties';
 import ActivityLog from '@/components/ui/ActivityLog';
 import RichTextContent from '@/components/ui/RichTextContent';
 import { ToastHandler } from '@/components/ui/ToastHandler';
+import { DueDateBadge } from '@/components/ui/DueDataBadge';
+import { Pencil, Trash2, Calendar, MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type Props = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -39,9 +41,8 @@ export default async function TaskPage({ params, searchParams }: Props) {
     numericProjectId <= 0 ||
     !Number.isInteger(numericTaskId) ||
     numericTaskId <= 0
-  ) {
+  )
     notFound();
-  }
 
   const task = await findTaskInProject({
     taskId: numericTaskId,
@@ -54,11 +55,7 @@ export default async function TaskPage({ params, searchParams }: Props) {
       priority: true,
       description: true,
       dueDate: true,
-      assignee: {
-        select: {
-          name: true,
-        },
-      },
+      assignee: { select: { name: true } },
       createdAt: true,
       comments: {
         where: { parentId: null },
@@ -82,59 +79,95 @@ export default async function TaskPage({ params, searchParams }: Props) {
     },
   });
 
-  const STATUS_LABEL: Record<string, string> = {
-    OPEN: 'Open',
-    DEVELOPING: 'In Progress',
-    REVIEW: 'Review',
-    CLOSED: 'Closed',
-  };
-
-  const PRIORITY_LABEL: Record<string, string> = {
-    LOW: 'Low',
-    MEDIUM: 'Medium',
-    HIGH: 'High',
-    CRITICAL: 'Critical',
-  };
-
   if (!task) notFound();
 
   const logs = await getActivityLogs({ taskId: numericTaskId });
-
   const deleteTaskWithIds = deleteTask.bind(null, {
     projectId: numericProjectId,
     taskId: numericTaskId,
   });
 
-  return (
-    <div className="space-y-6">
-      <ToastHandler message={toast} />
-      <div>
-        <Link
-          href={`/projects/${projectId}/tasks`}
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Back to tasks
-        </Link>
-      </div>
+  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
 
-      <div className="border-b pb-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Task
-        </p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-          {task.title}
-        </h1>
-        <div className="mt-3 flex items-center gap-2">
+  return (
+    <div className="space-y-5">
+      <ToastHandler message={toast} />
+
+      <Link
+        href={`/projects/${projectId}/tasks`}
+        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        ← Back to tasks
+      </Link>
+
+      {/* Header */}
+      <div className="flex flex-col gap-4 border-b pb-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Task
+            </p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight leading-snug">
+              {task.title}
+            </h1>
+          </div>
+
+          {/* Actions */}
+          <div className="flex shrink-0 items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <Link href={`/projects/${projectId}/tasks/${taskId}/edit`}>
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </Link>
+            </Button>
+            <DialogYesOrNo
+              title="Delete task?"
+              description="The task will be moved to trash. You can restore it after deletion."
+              confirmText="Delete task"
+              cancelText="Cancel"
+              variant="destructive"
+              action={deleteTaskWithIds}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </Button>
+            </DialogYesOrNo>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
           <TaskProperties task={task} projectId={numericProjectId} />
+
+          {task.assignee && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/15 text-[9px] font-semibold text-primary uppercase">
+                {task.assignee.name[0]}
+              </span>
+              {task.assignee.name}
+            </span>
+          )}
+
+          {task.dueDate && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              <DueDateBadge dueDate={task.dueDate} />
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Description</CardTitle>
-              <CardDescription>Main details for this task</CardDescription>
+      {/* Main grid */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="space-y-5">
+          {/* Description */}
+          <Card className="shadow-none">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Description</CardTitle>
             </CardHeader>
             <CardContent>
               <RichTextContent
@@ -143,54 +176,56 @@ export default async function TaskPage({ params, searchParams }: Props) {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Comments</CardTitle>
-              <CardDescription>
-                {task.comments.length === 0
-                  ? 'No comments yet'
-                  : `${task.comments.length} comment${task.comments.length === 1 ? '' : 's'}`}
-              </CardDescription>
+          {/* Comments */}
+          <Card className="shadow-none">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">
+                  Comments
+                  {task.comments.length > 0 && (
+                    <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
+                      {task.comments.length}
+                    </span>
+                  )}
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-0 p-0">
               {task.comments.length > 0 && (
-                <div className="space-y-4">
+                <div className="divide-y divide-border/40 border-t border-border/40">
                   {task.comments.map(
                     (comment: {
-                      user: {
-                        name: string;
-                        id: number;
-                      };
+                      user: { name: string; id: number };
                       id: number;
                       createdAt: Date;
                       text: string;
                       replies: {
-                        user: {
-                          name: string;
-                          id: number;
-                        };
+                        user: { name: string; id: number };
                         id: number;
                         createdAt: Date;
                         text: string;
                       }[];
-                    }) => {
-                      return (
-                        <CommentItem
-                          deleteAction={deleteComment}
-                          createComment={createComment}
-                          key={comment.id}
-                          comment={comment}
-                          projectId={numericProjectId}
-                          taskId={numericTaskId}
-                          currentUserId={userId}
-                        />
-                      );
-                    }
+                    }) => (
+                      <CommentItem
+                        deleteAction={deleteComment}
+                        createComment={createComment}
+                        key={comment.id}
+                        comment={comment}
+                        projectId={numericProjectId}
+                        taskId={numericTaskId}
+                        currentUserId={userId}
+                      />
+                    )
                   )}
                 </div>
               )}
-
-              <div className="border-t pt-4">
+              <div
+                className={cn(
+                  'px-6 py-4',
+                  task.comments.length > 0 && 'border-t border-border/40'
+                )}
+              >
                 <CommentForm
                   serverAction={createComment}
                   projectId={numericProjectId}
@@ -200,106 +235,75 @@ export default async function TaskPage({ params, searchParams }: Props) {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Actions</CardTitle>
-              <CardDescription>Update or remove this task</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href={`/projects/${projectId}/tasks/${taskId}/edit`}>
-                  Edit task
-                </Link>
-              </Button>
-
-              <DialogYesOrNo
-                title="Delete task?"
-                description="The task will be moved to trash. You can restore it after deletion."
-                confirmText="Delete task"
-                cancelText="Cancel"
-                variant="destructive"
-                action={deleteTaskWithIds}
-              >
-                <Button variant="destructive">Delete task</Button>
-              </DialogYesOrNo>
-            </CardContent>
-          </Card>
         </div>
 
+        {/* Sidebar */}
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Details</CardTitle>
-              <CardDescription>Context fields for this task</CardDescription>
+          <Card className="shadow-none">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Assignee
-                </p>
-                <p className="mt-1 font-medium">
-                  {task.assignee?.name ?? 'Unassigned'}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Due date
-                </p>
-                {task.dueDate ? (
-                  <div className="mt-1 flex items-center gap-2">
-                    <p className="font-medium">
+            <CardContent className="space-y-3">
+              {[
+                {
+                  label: 'Assignee',
+                  value: task.assignee ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary uppercase">
+                        {task.assignee.name[0]}
+                      </span>
+                      {task.assignee.name}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Unassigned</span>
+                  ),
+                },
+                {
+                  label: 'Due date',
+                  value: task.dueDate ? (
+                    <span
+                      className={cn(
+                        'flex items-center gap-1.5',
+                        isOverdue && 'text-destructive'
+                      )}
+                    >
                       {new Date(task.dueDate).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric',
                       })}
-                    </p>
-                    {new Date(task.dueDate) < new Date() ? (
-                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-                        Overdue
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        Estimated
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <p className="mt-1 font-medium text-muted-foreground">
-                    Not set
-                  </p>
-                )}
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Status
-                </p>
-                <p className="mt-1 font-medium">{STATUS_LABEL[task.status]}</p>
-              </div>
-
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Priority
-                </p>
-                <p className="mt-1 font-medium">
-                  {PRIORITY_LABEL[task.priority]}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Created
-                </p>
-                <p className="mt-1 font-medium">
-                  {task.createdAt.toLocaleDateString('en-GB', {
+                      {isOverdue && (
+                        <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-destructive">
+                          Overdue
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Not set</span>
+                  ),
+                },
+                {
+                  label: 'Created',
+                  value: task.createdAt.toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric',
-                  })}
-                </p>
-              </div>
+                  }),
+                },
+              ].map(({ label, value }) => (
+                <div
+                  key={label}
+                  className="flex items-start justify-between gap-3"
+                >
+                  <p className="shrink-0 text-xs text-muted-foreground">
+                    {label}
+                  </p>
+                  <p className="text-right text-xs font-medium">{value}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
+
           <ActivityLog logs={'error' in logs ? [] : logs} />
         </div>
       </div>

@@ -19,21 +19,21 @@ export default function DeleteCommentButton({
   const [state, action, isPending] = useActionState(serverAction, null);
 
   return (
-    <form action={action}>
+    <form action={action} className="inline">
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="taskId" value={taskId} />
       <input type="hidden" name="commentId" value={commentId} />
 
       {state?.error && (
-        <p className="text-xs text-destructive">{state.error}</p>
+        <span className="mr-2 text-xs text-destructive">{state.error}</span>
       )}
 
       <button
         type="submit"
-        className="text-xs text-muted-foreground transition-colors hover:text-destructive"
         disabled={isPending}
+        className="text-xs text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
       >
-        {isPending ? 'Deleting...' : 'Delete'}
+        {isPending ? 'Deleting…' : 'Delete'}
       </button>
     </form>
   );

@@ -6,10 +6,7 @@ import TrashComponent from '@/components/trash/TrashComponent';
 
 type Props = {
   params: Promise<{ projectId: string }>;
-  searchParams: Promise<{
-    highlight?: string;
-    search?: string;
-  }>;
+  searchParams: Promise<{ highlight?: string; search?: string }>;
 };
 
 export default async function TrashPage({ params, searchParams }: Props) {
@@ -19,9 +16,7 @@ export default async function TrashPage({ params, searchParams }: Props) {
   const userId = await getCurrentUserId();
   if (!userId) return null;
 
-  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) {
-    notFound();
-  }
+  if (!Number.isInteger(numericProjectId) || numericProjectId <= 0) notFound();
 
   const { highlight, search } = await searchParams;
   const numericHighlight = Number(highlight) > 0 ? Number(highlight) : null;
