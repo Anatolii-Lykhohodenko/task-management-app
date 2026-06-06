@@ -24,21 +24,21 @@ Organize projects, track tasks with priorities and due dates, collaborate with t
 
 | Dashboard | Projects |
 |-----------|----------|
-| (<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/6b680a3b-30bd-4c1f-a2cd-58dc8c631882" />
-) | (<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/014bcc5c-eb82-462e-a1e7-1eb015fc2d18" />
-) |
+| <img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/6b680a3b-30bd-4c1f-a2cd-58dc8c631882" />
+| <img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/014bcc5c-eb82-462e-a1e7-1eb015fc2d18" />
+ |
 
 | Task Board | Task Detail |
 |------------|-------------|
-| (<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/6abebf47-b760-49f9-9e26-8056d4a33a51" />
-) | (<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/0f6386f3-cca0-4bb9-a64b-f1e6ef7cbf34" />
-) |
+| <img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/6abebf47-b760-49f9-9e26-8056d4a33a51" />
+ | <img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/0f6386f3-cca0-4bb9-a64b-f1e6ef7cbf34" />
+ |
 
 | Tasks | Trash |
 |-------------|-------------|
-| (<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/b2288aa7-8cae-4b61-a1c4-a9dc52316bbc" />
-) | (<img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/5581e38a-089e-4116-98ed-3f53de042fc0" />
-) |
+| <img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/b2288aa7-8cae-4b61-a1c4-a9dc52316bbc" />
+ | <img width="1881" height="1310" alt="image" src="https://github.com/user-attachments/assets/5581e38a-089e-4116-98ed-3f53de042fc0" />
+ |
 
 ***
 
