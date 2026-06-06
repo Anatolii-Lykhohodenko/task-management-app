@@ -133,7 +133,6 @@ export default async function TaskPage({ params, searchParams }: Props) {
                 size="sm"
                 className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
-                <Trash2 className="h-3.5 w-3.5" />
                 Delete
               </Button>
             </DialogYesOrNo>
